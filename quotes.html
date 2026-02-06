@@ -1132,6 +1132,7 @@ body.t-brutalist .dir-row-avatar { border-radius: 4px; }
     <div class="dir-tabs">
       <button class="dir-tab active" data-tab="authors">Authors</button>
       <button class="dir-tab"        data-tab="contributors">Contributors</button>
+      <button class="dir-tab"        data-tab="departments">Departments</button>
     </div>
   </div>
 
@@ -1209,10 +1210,17 @@ async function fetchQuotes() {
         const [, rest]       = metaLine.split('added by');
         const [contrib, ab]  = (rest || '').split('| about:');
 
+        // extract department from contributor (e.g., "Harini (CSE)" → name: "Harini", dept: "CSE")
+        const contribStr = (contrib || '').trim() || 'A student';
+        const deptMatch  = contribStr.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+        const contribName = deptMatch ? deptMatch[1].trim() : contribStr;
+        const department  = deptMatch ? deptMatch[2].trim() : 'Unknown';
+
         quotes.push({
           quote:       qPart.replace(/[""]/g, '').trim(),
           author:      aPart.trim() || 'Unknown',
-          contributor: (contrib || '').trim() || 'A student',
+          contributor: contribName,
+          department:  department,
           about:       (ab || '').trim()
         });
       }
@@ -1245,7 +1253,13 @@ function render(animate = false) {
 
   document.getElementById('qText').textContent   = `\u201C${q.quote}\u201D`;
   document.getElementById('qAuthor').textContent  = `— ${q.author}`;
-  document.getElementById('qContrib').textContent = `🏅 Contributed by ${q.contributor}`;
+  
+  // Show department in parentheses if it exists
+  const contribText = q.department && q.department !== 'Unknown' 
+    ? `🏅 Contributed by ${q.contributor} (${q.department})`
+    : `🏅 Contributed by ${q.contributor}`;
+  document.getElementById('qContrib').textContent = contribText;
+  
   document.getElementById('qAbout').textContent   = q.about || '';
   document.getElementById('counter').textContent  = `${idx + 1} / ${quotes.length}`;
 
@@ -1456,18 +1470,20 @@ async function loadState() {
    DIRECTORY
    ══════════════════════════════════════════════ */
 
-let dirIndex     = { authors: {}, contributors: {} }; // name → [quoteIdx, …]
+let dirIndex     = { authors: {}, contributors: {}, departments: {} }; // name → [quoteIdx, …]
 let dirTab       = 'authors';   // current tab
 let dirExpanded  = null;        // currently expanded row key (or null)
 
 /* ── build index once after quotes are loaded ── */
 function buildDirectoryIndex() {
-  dirIndex = { authors: {}, contributors: {} };
+  dirIndex = { authors: {}, contributors: {}, departments: {} };
   quotes.forEach((q, i) => {
     const a = q.author;
     const c = q.contributor;
+    const d = q.department;
     (dirIndex.authors[a]       = dirIndex.authors[a]       || []).push(i);
     (dirIndex.contributors[c]  = dirIndex.contributors[c]  || []).push(i);
+    (dirIndex.departments[d]   = dirIndex.departments[d]   || []).push(i);
   });
 }
 
@@ -1564,9 +1580,14 @@ function renderDirList() {
       card.className = 'dir-quote';
 
       // label depends on which tab we're in
-      const metaLabel = dirTab === 'authors'
-        ? `contributed by ${q.contributor}`
-        : `— ${q.author}`;
+      let metaLabel;
+      if (dirTab === 'authors') {
+        metaLabel = `contributed by ${q.contributor}${q.department && q.department !== 'Unknown' ? ` (${q.department})` : ''}`;
+      } else if (dirTab === 'contributors') {
+        metaLabel = `— ${q.author}`;
+      } else { // departments tab
+        metaLabel = `${q.contributor} · — ${q.author}`;
+      }
 
       card.innerHTML = `
         <div class="dir-quote-text">\u201C${escHtml(q.quote)}\u201D</div>
@@ -1626,9 +1647,9 @@ function escHtml(s) {
 })();
 
 /* ══════════════════════════════════════════════
-   AUTO-ADVANCE (30 s)
+   AUTO-ADVANCE (3 s)
    ══════════════════════════════════════════════ */
-setInterval(() => go(1), 30000);
+setInterval(() => go(1), 3000);
 </script>
 </body>
 </html>
