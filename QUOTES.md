@@ -1,12 +1,7 @@
-> "Do. Or Do not. There is no Try." — Yoda
-> — added by Andrew Veda (English) | about: This quote increases my desire to just try!
-
-> "Ever tried. Ever failed. No matter. Try again. Fail again. Fail better." — Samuel Beckett
-> — added by Andrew Veda | about: This quote has destroyed my fear of failure! 
-
 > "As long as I live, There are infinite chances" — Luffy
-> — added by Meenz | about: Life itself gives endless opportunities 
+> — added by Meenz (Cyber Security) | about: Life itself gives endless opportunities 
+
+> "Failure doesn't mean game over. It means try again." — Game wisdom
+> — added by Meenz (Cyber Security) | about:It is a lesson, not a defeat !
 
 ADD YOUR QUOTES BELOW THIS LINE.
-> "Failure doesn't mean game over. It means try again." — Game wisdom
-> — added by Meenz | about:It is a lesson, not a defeat !
