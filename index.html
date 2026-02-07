@@ -1165,9 +1165,7 @@ body.t-wellness {
   </div>
 </div>
 
-  <div style="display:flex;align-items:center;gap:14px;">
-    <button class="dir-toggle" id="dirToggle">⊞ Directory</button>
-  </div>
+
 </header>
 
 <!-- ─── STAGE ─── -->
@@ -1488,9 +1486,11 @@ document.querySelectorAll('.quick-tab').forEach(btn => {
 }
 
 /* ── open / close ── */
-document.getElementById('dirToggle').addEventListener('click', () => {
-  openDir();
-});
+const dirToggle = document.getElementById('dirToggle');
+if (dirToggle) {
+  dirToggle.addEventListener('click', openDir);
+}
+
 document.getElementById('dirClose').addEventListener('click', closeDir);
 document.getElementById('dirBackdrop').addEventListener('click', closeDir);
 
