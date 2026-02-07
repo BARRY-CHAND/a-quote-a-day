@@ -1142,7 +1142,7 @@ body.t-wellness {
   border-color: var(--gold);
 }
 
-
+#sc-quote { word-break: break-word; }
 </style>
 </head>
 <body class="t-glass">
@@ -1647,6 +1647,16 @@ function escHtml(s) {
    AUTO-ADVANCE (3 s)
    ══════════════════════════════════════════════ */
 setInterval(() => go(1), 30000);
+
+  function fitQuoteText(el, maxHeight, maxFont = 64, minFont = 32) {
+  let size = maxFont;
+  el.style.fontSize = size + 'px';
+
+  while (el.scrollHeight > maxHeight && size > minFont) {
+    size -= 2;
+    el.style.fontSize = size + 'px';
+  }
+  }
 async function shareAsImage() {
   try {
     const q = quotes[idx];
@@ -1654,6 +1664,18 @@ async function shareAsImage() {
     // Fill share card
     document.getElementById('sc-quote').textContent =
       q.quote;
+    const quoteEl = document.getElementById('sc-quote');
+quoteEl.textContent = q.quote;
+
+/* reset size before fitting */
+quoteEl.style.fontSize = '64px';
+quoteEl.style.lineHeight = '1.45';
+
+/* let layout settle */
+await new Promise(r => requestAnimationFrame(r));
+
+/* dynamically shrink if needed */
+fitQuoteText(quoteEl, 600);
 
     document.getElementById('sc-author').textContent =
       `${q.author}`;
