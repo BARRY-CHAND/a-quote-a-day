@@ -1110,6 +1110,37 @@ body.t-wellness {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* ─── QUICK DIRECTORY TABS ─── */
+.quick-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.quick-tab {
+  font-family: 'Raleway', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.06);
+  color: var(--text-dim);
+  transition: all 0.2s;
+}
+
+.quick-tab:hover {
+  background: rgba(255,255,255,0.12);
+  color: var(--text);
+}
+
+.quick-tab.active {
+  background: var(--gold);
+  color: #0a0a0a;
+  border-color: var(--gold);
+}
 
 
 </style>
@@ -1120,10 +1151,20 @@ body.t-wellness {
 <!-- ─── TOP BAR ─── -->
 <div class="shell">
 <header class="topbar">
-  <div class="topbar-left">
+ <div class="topbar-left" style="flex-direction:column; align-items:flex-start; gap:6px;">
+  <div style="display:flex; align-items:center; gap:10px;">
     <span class="topbar-title">A Quote A Day</span>
     <span class="topbar-counter" id="counter">— / —</span>
   </div>
+
+  <!-- Quick directory buttons -->
+  <div class="quick-tabs">
+    <button class="quick-tab" data-tab="authors">Authors</button>
+    <button class="quick-tab" data-tab="contributors">Contributors</button>
+    <button class="quick-tab" data-tab="departments">Departments</button>
+  </div>
+</div>
+
   <div style="display:flex;align-items:center;gap:14px;">
     <button class="dir-toggle" id="dirToggle">⊞ Directory</button>
   </div>
@@ -1409,9 +1450,32 @@ async function loadState() {
 let dirIndex     = { authors: {}, contributors: {}, departments: {} }; // name → [quoteIdx, …]
 let dirTab       = 'authors';   // current tab
 let dirExpanded  = null;        // currently expanded row key (or null)
+document.querySelectorAll('.quick-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
 
-/* ── build index once after quotes are loaded ── */
-function buildDirectoryIndex() {
+    // 1. Open directory panel
+    openDir();
+
+    // 2. Activate correct directory tab pill
+    document.querySelectorAll('.dir-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.tab === tab);
+    });
+
+    // 3. Update directory state
+    dirTab = tab;
+    dirExpanded = null;
+    document.getElementById('dirSearch').value = '';
+    renderDirList();
+
+    // 4. Visual state for topbar buttons
+    document.querySelectorAll('.quick-tab').forEach(b => {
+      b.classList.toggle('active', b === btn);
+    });
+  });
+});
+
+  function buildDirectoryIndex() {
   dirIndex = { authors: {}, contributors: {}, departments: {} };
   quotes.forEach((q, i) => {
     const a = q.author;
