@@ -4,7 +4,10 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>A Quote A Day ✨</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Raleway:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=Syne:wght@700;800&family=DM+Mono:wght@300;400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Unbounded:wght@700;800&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&display=swap" rel="stylesheet">
+<link
+  href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Raleway:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=Syne:wght@700;800&family=DM+Mono:wght@300;400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Unbounded:wght@700;800&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&display=swap"
+  rel="stylesheet"
+  crossorigin="anonymous">
 <style>
 /* ─── RESET & BASE ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,6 +18,7 @@
   --card-bg: rgba(255,255,255,0.04);
   --card-border: rgba(255,255,255,0.10);
   --text: #f0efe8;
+  --about-text: rgba(255,255,255,0.42);
   --text-dim: #888;
   --transition: 0.45s cubic-bezier(.4,0,.2,1);
 }
@@ -208,6 +212,7 @@ html, body {
   margin-left: auto;
   margin-right: auto;
   min-height: 24px;
+  color: var(--about-text);
   transition: opacity 0.3s;
 }
 
@@ -1094,6 +1099,36 @@ body.t-brutalist .dir-row-avatar { border-radius: 4px; }
   border-color: var(--gold);
   transform: translateY(-1px);
 }
+  body.t-minimal {
+  --about-text: rgba(0,0,0,0.55);
+}
+body.t-wellness {
+  --about-text: rgba(61,51,71,0.55);
+}
+.freeze-capture {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.capture-clone {
+  position: fixed !important;
+  top: -10000px !important;
+  left: 0;
+  width: 720px; /* story-safe width */
+  background: #0f1629; /* fallback */
+  overflow: visible !important;
+}
+
+.capture-clone * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+#shareCard, #shareCard * {
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 
 </style>
 </head>
@@ -1133,6 +1168,16 @@ body.t-brutalist .dir-row-avatar { border-radius: 4px; }
    rel="noopener">
   💬 View / start discussion!
 </a>
+    
+<a class="comment-btn"
+   href="https://github.com/AndrewVeda/a-quote-a-day/edit/main/QUOTES.md"
+   target="_blank"
+   rel="noopener">
+✏️ Add your quote
+</a>
+<button class="comment-btn" onclick="shareAsImage()">
+📸 Share as image
+</button>
 
 
     <!-- Nav -->
@@ -1229,7 +1274,7 @@ async function fetchQuotes() {
         const department  = deptMatch ? deptMatch[2].trim() : 'Unknown';
 
         quotes.push({
-          quote:       qPart.replace(/[""]/g, '').trim(),
+          quote: qPart.replace(/["""]/g, '').trim(),
           author:      aPart.trim() || 'Unknown',
           contributor: contribName,
           department:  department,
@@ -1520,9 +1565,7 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* ══════════════════════════════════════════════
-   SWIPE GESTURE (mobile)
-   ══════════════════════════════════════════════ */
+
 (function () {
   let startX = 0, startY = 0, moved = false;
   const THRESHOLD = 40; // px minimum drag to count as a swipe
@@ -1555,6 +1598,228 @@ function escHtml(s) {
    AUTO-ADVANCE (3 s)
    ══════════════════════════════════════════════ */
 setInterval(() => go(1), 3000);
+async function shareAsImage() {
+  try {
+    const q = quotes[idx];
+
+    // Fill share card
+    document.getElementById('sc-quote').textContent =
+      q.quote;
+
+    document.getElementById('sc-author').textContent =
+      `${q.author}`;
+
+    document.getElementById('sc-about').textContent =
+      q.about ? q.about : '';
+
+    document.getElementById('sc-contrib').textContent =
+      `Contributed by ${q.contributor}${q.department !== 'Unknown' ? ` (${q.department})` : ''}`;
+
+    const node = document.getElementById('shareCard');
+
+   
+   const dpr = window.devicePixelRatio || 2;
+
+const canvas = await html2canvas(node, {
+  scale: dpr,
+  useCORS: true,
+  backgroundColor: '#1a1410'
+});
+
+
+    const blob = await new Promise(res =>
+      canvas.toBlob(res, 'image/png')
+    );
+
+    if (!blob) throw new Error('Image export failed');
+
+    const file = new File([blob], 'a-quote-a-day.png', { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'A Quote A Day' });
+    } else {
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert('Image generated, but sharing is not supported on this device.');
+  }
+}
+
+
 </script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ARISTOCRATIC SHARE CARD DESIGN
+     Featuring: Ornate borders, gold accents, refined typography
+     ═══════════════════════════════════════════════════════════ -->
+ <div id="shareCard" style="
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 1080px;
+  height: 1350px;
+  padding: 0;
+  background: linear-gradient(135deg, #1a1410 0%, #2d1f15 50%, #1a1410 100%);
+  color: #f5ede0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  position: relative;
+  overflow: hidden;
+">
+  
+  <!-- Textured overlay -->
+  <div style="
+    position: absolute;
+    inset: 0;
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(212,175,55,0.02) 2px, rgba(212,175,55,0.02) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(212,175,55,0.02) 2px, rgba(212,175,55,0.02) 4px);
+    pointer-events: none;
+    opacity: 0.3;
+  "></div>
+
+  <!-- Ornate border frame -->
+  <div style="
+    position: absolute;
+    inset: 60px;
+    border: 3px solid #d4af37;
+    box-shadow: 
+      inset 0 0 0 1px rgba(212,175,55,0.3),
+      inset 0 0 0 12px #1a1410,
+      0 0 30px rgba(212,175,55,0.15);
+    pointer-events: none;
+  "></div>
+
+  <!-- Corner flourishes -->
+  <div style="position:absolute; top:50px; left:50px; width:60px; height:60px; border-top:4px solid #d4af37; border-left:4px solid #d4af37; opacity:0.8;"></div>
+  <div style="position:absolute; top:50px; right:50px; width:60px; height:60px; border-top:4px solid #d4af37; border-right:4px solid #d4af37; opacity:0.8;"></div>
+  <div style="position:absolute; bottom:50px; left:50px; width:60px; height:60px; border-bottom:4px solid #d4af37; border-left:4px solid #d4af37; opacity:0.8;"></div>
+  <div style="position:absolute; bottom:50px; right:50px; width:60px; height:60px; border-bottom:4px solid #d4af37; border-right:4px solid #d4af37; opacity:0.8;"></div>
+
+  <!-- Inner corner accents -->
+  <div style="position:absolute; top:70px; left:70px; width:30px; height:30px; border-top:2px solid #d4af37; border-left:2px solid #d4af37; opacity:0.4;"></div>
+  <div style="position:absolute; top:70px; right:70px; width:30px; height:30px; border-top:2px solid #d4af37; border-right:2px solid #d4af37; opacity:0.4;"></div>
+  <div style="position:absolute; bottom:70px; left:70px; width:30px; height:30px; border-bottom:2px solid #d4af37; border-left:2px solid #d4af37; opacity:0.4;"></div>
+  <div style="position:absolute; bottom:70px; right:70px; width:30px; height:30px; border-bottom:2px solid #d4af37; border-right:2px solid #d4af37; opacity:0.4;"></div>
+
+  <!-- Content wrapper -->
+  <div style="padding: 200px 160px; position: relative; z-index: 2;">
+    
+    <!-- Top decorative element -->
+    <div style="
+      margin: 0 auto 50px;
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #d4af37, transparent);
+    "></div>
+    
+    <!-- Opening quote mark -->
+    <div style="
+      font-family: 'Cinzel', serif;
+      font-size: 140px;
+      line-height: 0.5;
+      color: #d4af37;
+      opacity: 0.25;
+      margin-bottom: 40px;
+    ">"</div>
+
+    <div id="sc-quote" style="
+      font-size: 64px;
+      line-height: 1.45;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      color: #f5ede0;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    "></div>
+
+    <!-- Closing quote mark -->
+    <div style="
+      font-family: 'Cinzel', serif;
+      font-size: 140px;
+      line-height: 0.5;
+      color: #d4af37;
+      opacity: 0.25;
+      margin-top: 40px;
+      transform: rotate(180deg);
+    ">"</div>
+
+    <!-- Decorative divider -->
+    <div style="
+      margin: 50px auto 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    ">
+      <div style="width:80px; height:1px; background:linear-gradient(90deg, transparent, #d4af37);"></div>
+      <div style="width:8px; height:8px; background:#d4af37; transform:rotate(45deg); opacity:0.6;"></div>
+      <div style="width:80px; height:1px; background:linear-gradient(90deg, #d4af37, transparent);"></div>
+    </div>
+
+    <div id="sc-author" style="
+      margin-top: 48px;
+      font-family: 'Cinzel', serif;
+      font-size: 36px;
+      letter-spacing: 4px;
+      color: #d4af37;
+      text-transform: uppercase;
+      font-weight: 500;
+      text-shadow: 0 2px 12px rgba(212,175,55,0.3);
+    "></div>
+
+    <div id="sc-about" style="
+      margin-top: 45px;
+      font-size: 32px;
+      font-style: italic;
+      color: #c9b896;
+      line-height: 1.5;
+      opacity: 0.85;
+    "></div>
+
+    <div id="sc-contrib" style="
+      margin-top: 70px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 26px;
+      letter-spacing: 2px;
+      color: #a89968;
+      font-weight: 300;
+    "></div>
+  </div>
+
+  <!-- Bottom decorative element and branding -->
+  <div style="
+    position: absolute;
+    bottom: 100px;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+  ">
+    <div style="
+      width: 100px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #d4af37, transparent);
+      opacity: 0.5;
+    "></div>
+    <div style="
+      font-family: 'Cinzel', serif;
+      font-size: 22px;
+      letter-spacing: 4px;
+      color: #d4af37;
+      opacity: 0.5;
+      text-transform: uppercase;
+    ">A Quote A Day</div>
+  </div>
+</div>
+
 </body>
 </html>
