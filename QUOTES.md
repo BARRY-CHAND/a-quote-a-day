@@ -9,3 +9,6 @@
 
 
 ADD YOUR QUOTES BELOW THIS LINE. COPY AND PASTE ONE SET ABOVE AND EDIT IT. Mention your department in parenthesis next to your name and mention what the quote you've submitted makes you think and feel!
+
+"Life doesn’t give us purpose. We give life purpose.” — Barry Allen(Flash)
+added by Barry(Pacman) (cyber security)| about : It means meaning isn’t handed to you by fate — you create it through your choices and actions.
