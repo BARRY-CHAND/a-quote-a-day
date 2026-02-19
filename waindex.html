@@ -638,18 +638,15 @@ body::after {
   flex: 1;
   overflow: hidden;
   position: relative;
-  display: flex;
-  align-items: stretch;
 }
 .deck-track {
   display: flex;
   height: 100%;
-  transition: transform 0.38s cubic-bezier(.4,0,.2,1);
-  will-change: transform;
+  /* width set by JS based on number of slides */
 }
 .deck-slide {
-  flex: 0 0 100%;
-  width: 100%;
+  flex: 0 0 100vw;
+  width: 100vw;
   height: 100%;
   overflow-y: auto;
   display: flex;
@@ -1182,10 +1179,10 @@ function renderGrouped(container, field) {
   _lastRenderedQuotes = allQuotes;
 
   const groups = {};
-  allQuotes.forEach((q, globalIdx) => {
+  allQuotes.forEach(q => {
     const key = q[field] || 'Unknown';
     if (!groups[key]) groups[key] = [];
-    groups[key].push({ ...q, globalIdx });
+    groups[key].push(q);   // original reference, not a copy
   });
 
   const sortedKeys = Object.keys(groups).sort((a, b) => {
@@ -1309,29 +1306,64 @@ function makeArchiveDateHeader(dateStrOrLabel, count, isLabel = false) {
 
 /* openModal is defined later in the share section */
 
+
 /* ══════════════════════════════════════════════
    DECK VIEWER ENGINE
    ══════════════════════════════════════════════ */
-let _deckQuotes  = [];   // the current list of quotes in the deck
-let _deckIdx     = 0;    // active slide index
+let _deckQuotes  = [];
+let _deckIdx     = 0;
 let _currentShareQuote = null;
+
+function openModal(q) {
+  // Use the current view's quote list; fall back to allQuotes
+  const pool = _lastRenderedQuotes.length ? _lastRenderedQuotes : allQuotes;
+  // Find by reference first, then by quote text as fallback
+  let idx = pool.indexOf(q);
+  if (idx === -1) idx = pool.findIndex(p => p.quote === q.quote && p.contributor === q.contributor);
+  if (idx === -1) idx = 0;
+  openDeck(pool, idx);
+}
 
 function openDeck(quotes, startIdx) {
   _deckQuotes = quotes;
-  _deckIdx    = startIdx;
 
+  // Build slides
   const track = document.getElementById('deckTrack');
   track.innerHTML = '';
+  track.style.transition = 'none';
+  track.style.transform  = 'translateX(0)';
 
-  // Build all slides
   quotes.forEach((q, i) => {
     const slide = document.createElement('div');
     slide.className = 'deck-slide';
-    slide.innerHTML = buildSlideHTML(q, i);
 
-    // Wire up action buttons
-    slide.querySelector('.dc-btn-discuss').href =
-      `https://github.com/AndrewVeda/a-quote-a-day/discussions?discussions_q=Quote+%23${allQuotes.indexOf(q) + 1}`;
+    const globalNum = allQuotes.findIndex(p => p.quote === q.quote && p.contributor === q.contributor) + 1;
+    const hasAbout  = !!q.about;
+
+    slide.innerHTML = `
+      <div class="deck-card">
+        <div class="dc-kicker">Quote #${globalNum} · ${formatDateFull(q.dateStr)}</div>
+        <div class="dc-quote">"${escHtml(q.quote)}"</div>
+        <div class="dc-author-name">${escHtml(q.author)}</div>
+        <div class="dc-author-role">Quoted Author</div>
+        <div class="dc-contrib-box">
+          <div class="dc-contrib-label">Contributed by</div>
+          <div class="dc-contrib-name">${escHtml(q.contributor)}</div>
+          <div class="dc-contrib-dept">${escHtml(q.department || '')}</div>
+          ${hasAbout ? `
+            <div class="dc-contrib-divider"></div>
+            <div class="dc-about-label">What this means to me</div>
+            <div class="dc-about-text">${escHtml(q.about)}</div>
+          ` : ''}
+        </div>
+        <div class="dc-actions">
+          <a class="dc-btn primary dc-btn-discuss" href="https://github.com/AndrewVeda/a-quote-a-day/discussions?discussions_q=Quote+%23${globalNum}" target="_blank" rel="noopener">💬 Discuss</a>
+          <button class="dc-btn dc-btn-wa">📲 WhatsApp</button>
+          <button class="dc-btn dc-btn-img">📸 Share</button>
+          <a class="dc-btn" href="https://andrewveda.github.io/a-quote-a-day/submissions" target="_blank">✏️ Add a Quote</a>
+        </div>
+      </div>`;
+
     slide.querySelector('.dc-btn-wa').addEventListener('click', () => {
       _currentShareQuote = q; shareToWhatsApp();
     });
@@ -1342,72 +1374,42 @@ function openDeck(quotes, startIdx) {
     track.appendChild(slide);
   });
 
-  buildDeckDots();
-  jumpTo(_deckIdx, false);
+  // Build dots
+  const dotsWrap = document.getElementById('deckDots');
+  dotsWrap.innerHTML = '';
+  if (quotes.length > 1) {
+    quotes.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'deck-dot';
+      d.addEventListener('click', () => deckGoTo(i));
+      dotsWrap.appendChild(d);
+    });
+  }
 
+  // Show overlay before jumping so layout is painted
   document.getElementById('deckOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
-}
 
-function buildSlideHTML(q, i) {
-  const globalNum = allQuotes.indexOf(q) + 1;
-  const hasAbout  = !!q.about;
-  return `
-    <div class="deck-card">
-      <div class="dc-kicker">Quote #${globalNum} · ${formatDateFull(q.dateStr)}</div>
-      <div class="dc-quote">"${escHtml(q.quote)}"</div>
-
-      <div class="dc-author-name">${escHtml(q.author)}</div>
-      <div class="dc-author-role">Quoted Author</div>
-
-      <div class="dc-contrib-box">
-        <div class="dc-contrib-label">Contributed by</div>
-        <div class="dc-contrib-name">${escHtml(q.contributor)}</div>
-        <div class="dc-contrib-dept">${escHtml(q.department || '')}</div>
-        ${hasAbout ? `
-          <div class="dc-contrib-divider"></div>
-          <div class="dc-about-label">What this means to me</div>
-          <div class="dc-about-text">${escHtml(q.about)}</div>
-        ` : ''}
-      </div>
-
-      <div class="dc-actions">
-        <a class="dc-btn primary dc-btn-discuss" href="#" target="_blank" rel="noopener">💬 Discuss</a>
-        <button class="dc-btn dc-btn-wa">📲 WhatsApp</button>
-        <button class="dc-btn dc-btn-img">📸 Share</button>
-        <a class="dc-btn" href="https://andrewveda.github.io/a-quote-a-day/submissions" target="_blank">✏️ Add a Quote</a>
-      </div>
-    </div>
-  `;
-}
-
-function buildDeckDots() {
-  const wrap = document.getElementById('deckDots');
-  wrap.innerHTML = '';
-  if (_deckQuotes.length <= 1) return;
-  _deckQuotes.forEach((_, i) => {
-    const d = document.createElement('div');
-    d.className = 'deck-dot' + (i === _deckIdx ? ' active' : '');
-    d.addEventListener('click', () => jumpTo(i));
-    wrap.appendChild(d);
+  // Jump after a frame so track width is known
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      deckGoTo(startIdx, false);
+    });
   });
 }
 
-function jumpTo(i, animate = true) {
+function deckGoTo(i, animate = true) {
   const track = document.getElementById('deckTrack');
-  if (!animate) track.style.transition = 'none';
-  track.style.transform = `translateX(-${i * 100}%)`;
-  if (!animate) requestAnimationFrame(() => { track.style.transition = ''; });
+  _deckIdx = Math.max(0, Math.min(i, _deckQuotes.length - 1));
+  _currentShareQuote = _deckQuotes[_deckIdx];
 
-  _deckIdx = i;
-  _currentShareQuote = _deckQuotes[i];
+  track.style.transition = animate ? 'transform 0.38s cubic-bezier(.4,0,.2,1)' : 'none';
+  track.style.transform  = `translateX(-${_deckIdx * 100}%)`;
 
-  document.getElementById('deckCounter').textContent = `${i + 1} / ${_deckQuotes.length}`;
-  document.querySelectorAll('.deck-dot').forEach((d, j) => {
-    d.classList.toggle('active', j === i);
-  });
-  document.getElementById('deckPrev').disabled = (i === 0);
-  document.getElementById('deckNext').disabled = (i === _deckQuotes.length - 1);
+  document.getElementById('deckCounter').textContent = `${_deckIdx + 1} / ${_deckQuotes.length}`;
+  document.querySelectorAll('.deck-dot').forEach((d, j) => d.classList.toggle('active', j === _deckIdx));
+  document.getElementById('deckPrev').disabled = (_deckIdx === 0);
+  document.getElementById('deckNext').disabled = (_deckIdx === _deckQuotes.length - 1);
 }
 
 function closeDeck() {
@@ -1415,51 +1417,42 @@ function closeDeck() {
   document.body.style.overflow = '';
 }
 
-// Close button
+// Controls
 document.getElementById('deckClose').addEventListener('click', closeDeck);
+document.getElementById('deckPrev').addEventListener('click', () => deckGoTo(_deckIdx - 1));
+document.getElementById('deckNext').addEventListener('click', () => deckGoTo(_deckIdx + 1));
 
-// Arrow buttons
-document.getElementById('deckPrev').addEventListener('click', () => {
-  if (_deckIdx > 0) jumpTo(_deckIdx - 1);
-});
-document.getElementById('deckNext').addEventListener('click', () => {
-  if (_deckIdx < _deckQuotes.length - 1) jumpTo(_deckIdx + 1);
-});
-
-// Keyboard
 document.addEventListener('keydown', e => {
   if (!document.getElementById('deckOverlay').classList.contains('open')) return;
   if (e.key === 'Escape')     closeDeck();
-  if (e.key === 'ArrowLeft')  { if (_deckIdx > 0) jumpTo(_deckIdx - 1); }
-  if (e.key === 'ArrowRight') { if (_deckIdx < _deckQuotes.length - 1) jumpTo(_deckIdx + 1); }
+  if (e.key === 'ArrowLeft')  deckGoTo(_deckIdx - 1);
+  if (e.key === 'ArrowRight') deckGoTo(_deckIdx + 1);
 });
 
 // Touch swipe
-(function() {
+(function () {
   const overlay = document.getElementById('deckOverlay');
-  let sx = 0, sy = 0;
+  let sx = 0, sy = 0, dragging = false;
+
   overlay.addEventListener('touchstart', e => {
     sx = e.touches[0].clientX;
     sy = e.touches[0].clientY;
+    dragging = false;
   }, { passive: true });
+
+  overlay.addEventListener('touchmove', e => {
+    dragging = true;
+  }, { passive: true });
+
   overlay.addEventListener('touchend', e => {
+    if (!dragging) return;
     const dx = e.changedTouches[0].clientX - sx;
     const dy = e.changedTouches[0].clientY - sy;
-    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
-    if (dx < 0 && _deckIdx < _deckQuotes.length - 1) jumpTo(_deckIdx + 1);
-    if (dx > 0 && _deckIdx > 0) jumpTo(_deckIdx - 1);
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    if (dx < 0) deckGoTo(_deckIdx + 1);
+    else         deckGoTo(_deckIdx - 1);
   }, { passive: true });
 })();
-
-// openModal now opens the deck — context-aware:
-// passes the full current view's quotes so you can swipe through the whole set
-function openModal(q, displayIdx) {
-  // Gather the contextual quote list from the current render
-  // Fall back to all quotes if we can't determine context
-  const ctxQuotes = _lastRenderedQuotes.length ? _lastRenderedQuotes : allQuotes;
-  const startIdx  = ctxQuotes.indexOf(q);
-  openDeck(ctxQuotes, startIdx >= 0 ? startIdx : 0);
-}
 
 /* ══════════════════════════════════════════════
    HELPERS
