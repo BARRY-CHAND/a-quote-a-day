@@ -644,11 +644,11 @@ body::after {
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(201,168,76,0.3);
 }
-/* Quoted author — secondary, smaller */
+/* Quoted author — always the biggest name */
 .modal-author-name {
   font-family: var(--serif);
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: clamp(26px, 4vw, 34px);
+  font-weight: 900;
   color: var(--text);
   letter-spacing: 0.2px;
   line-height: 1.1;
@@ -661,13 +661,13 @@ body::after {
   color: var(--text-dim);
   margin-top: 3px;
 }
-.modal-author-contrib { display: none; } /* replaced by modal-contrib-block */
+.modal-author-contrib { display: none; }
 
-/* ── Contributor hero block ── */
+/* ── Unified contributor + about box ── */
 .modal-contrib-block {
-  margin-top: 18px;
+  margin-top: 16px;
   padding: 18px 20px;
-  background: linear-gradient(135deg, var(--gold-dim), rgba(201,168,76,0.06));
+  background: linear-gradient(135deg, var(--gold-dim), rgba(201,168,76,0.04));
   border: 1px solid var(--gold-border);
   border-left: 4px solid var(--gold);
   border-radius: 12px;
@@ -680,11 +680,11 @@ body::after {
   letter-spacing: 2.5px;
   text-transform: uppercase;
   color: var(--gold);
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 .modal-contrib-name {
   font-family: var(--serif);
-  font-size: clamp(24px, 4vw, 32px);
+  font-size: clamp(20px, 3.2vw, 26px);
   font-weight: 900;
   color: var(--text);
   line-height: 1.1;
@@ -696,8 +696,29 @@ body::after {
   letter-spacing: 2.5px;
   text-transform: uppercase;
   color: var(--gold);
-  margin-top: 5px;
+  margin-top: 4px;
   opacity: 0.85;
+}
+.modal-contrib-divider {
+  height: 1px;
+  background: var(--gold-border);
+  margin: 16px 0;
+}
+.modal-about-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.modal-about-text {
+  font-family: var(--sans);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-muted);
 }
 .modal-about-label {
   font-family: var(--sans);
@@ -902,7 +923,7 @@ body::after {
       <div class="modal-headline" id="mHeadline"></div>
     </div>
     <div class="modal-body">
-      <!-- Quoted author (secondary) -->
+      <!-- Quoted author — always biggest -->
       <div class="modal-author-block">
         <div class="modal-author-initial" id="mInitial"></div>
         <div>
@@ -910,15 +931,18 @@ body::after {
           <div class="modal-author-role">Quoted Author</div>
         </div>
       </div>
-      <!-- Contributor hero block -->
+      <!-- Contributor + "what it means to me" — single unified box -->
       <div class="modal-contrib-block">
-        <div class="modal-contrib-label">Contributed by</div>
-        <div class="modal-contrib-name" id="mContrib"></div>
-        <div class="modal-contrib-dept" id="mDept"></div>
-      </div>
-      <div id="mAboutWrap" style="display:none">
-        <div class="modal-about-label">What this means to me</div>
-        <div class="modal-about-text" id="mAbout"></div>
+        <div class="modal-contrib-header">
+          <div class="modal-contrib-label">Contributed by</div>
+          <div class="modal-contrib-name" id="mContrib"></div>
+          <div class="modal-contrib-dept" id="mDept"></div>
+        </div>
+        <div id="mAboutWrap" style="display:none">
+          <div class="modal-contrib-divider"></div>
+          <div class="modal-about-label">What this means to me</div>
+          <div class="modal-about-text" id="mAbout"></div>
+        </div>
       </div>
       <div class="modal-actions">
         <a class="modal-btn primary" id="mDiscussion" href="#" target="_blank" rel="noopener">💬 Discuss</a>
