@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>A Quote A Day</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=UnifrakturMaguntia&family=IM+Fell+English:ital@0;1&family=Raleway:wght@300;400;600;700&family=DM+Mono:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" crossorigin="anonymous"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #1a1208;
+  --ink-mid: #3d2e10;
+  --ink-light: #6b5c3e;
+  --paper: #f4edd8;
+  --paper-dark: #e8dfc4;
+  --paper-darkest: #d9cdb0;
+  --rule: rgba(26,18,8,0.18);
+  --rule-heavy: rgba(26,18,8,0.55);
+  --gold: #8b6914;
+  --gold-bright: #c49a1a;
+  --red: #8b1a1a;
+  --today-bg: #fdf8ec;
+  --shadow: rgba(26,18,8,0.12);
+  --serif: 'Playfair Display', Georgia, serif;
+  --body: 'IM Fell English', 'Times New Roman', serif;
+  --sans: 'Raleway', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --fraktur: 'UnifrakturMaguntia', serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* ─── MASTHEAD ─── */
+.masthead {
+  background: var(--paper);
+  border-bottom: 3px double var(--rule-heavy);
+  text-align: center;
+  padding: 20px 24px 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.masthead-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--sans);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 8px;
+}
+
+.masthead-dateline { font-family: var(--mono); font-size: 9px; }
+.masthead-edition {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 2px 8px;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+
+.masthead-title {
+  font-family: var(--fraktur);
+  font-size: clamp(36px, 8vw, 72px);
+  color: var(--ink);
+  letter-spacing: 2px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.masthead-rule-ornament {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+.masthead-rule-ornament::before,
+.masthead-rule-ornament::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule-heavy);
+}
+.masthead-ornament {
+  font-size: 16px;
+  color: var(--gold);
+  opacity: 0.8;
+}
+
+.masthead-tagline {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-light);
+  letter-spacing: 0.5px;
+  padding-bottom: 12px;
+}
+
+/* ─── NAV BAR ─── */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border-top: 1px solid var(--rule);
+  background: var(--paper-dark);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-bar::-webkit-scrollbar { display: none; }
+
+.nav-item {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  padding: 8px 16px;
+  cursor: pointer;
+  border-right: 1px solid var(--rule);
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+  background: none;
+  border-top: none;
+  border-bottom: none;
+  border-left: none;
+}
+.nav-item:first-child { border-left: 1px solid var(--rule); }
+.nav-item:hover { background: var(--paper-darkest); }
+.nav-item.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ─── LAYOUT ─── */
+.newspaper-body {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px 60px;
+}
+
+/* ─── SECTION LABEL ─── */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 28px 0 0;
+}
+.section-label-text {
+  font-family: var(--sans);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+  padding: 5px 14px;
+}
+.section-label-rule {
+  flex: 1;
+  height: 2px;
+  background: var(--ink);
+}
+.section-label-date {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-light);
+  padding: 5px 12px;
+  border: 1px solid var(--rule-heavy);
+  border-left: none;
+  background: var(--paper-dark);
+}
+
+/* ─── TODAY BANNER ─── */
+.today-banner {
+  background: var(--ink);
+  color: var(--paper);
+  text-align: center;
+  padding: 6px;
+  font-family: var(--sans);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 0;
+}
+
+/* ─── TODAY HERO QUOTE ─── */
+.today-hero {
+  background: var(--today-bg);
+  border: 1px solid var(--rule-heavy);
+  border-top: 4px solid var(--ink);
+  margin-top: 0;
+  padding: 32px 36px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.today-hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 27px,
+    rgba(26,18,8,0.04) 27px,
+    rgba(26,18,8,0.04) 28px
+  );
+  pointer-events: none;
+}
+
+.hero-kicker {
+  font-family: var(--sans);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 10px;
+}
+
+.hero-quote-mark {
+  font-family: var(--serif);
+  font-size: 120px;
+  line-height: 0.6;
+  color: var(--ink);
+  opacity: 0.07;
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  user-select: none;
+}
+
+.hero-quote-text {
+  font-family: var(--serif);
+  font-size: clamp(22px, 3.5vw, 38px);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--ink);
+  position: relative;
+  z-index: 1;
+  padding-left: 8px;
+  border-left: 3px solid var(--ink);
+  margin-bottom: 18px;
+}
+
+.hero-byline {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-light);
+  letter-spacing: 0.5px;
+}
+.hero-byline strong {
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.hero-about {
+  margin-top: 12px;
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-mid);
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+}
+
+.hero-contrib {
+  margin-top: 10px;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* ─── COLUMN GRID ─── */
+.col-grid {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--rule-heavy);
+  border-top: none;
+  background: var(--rule);
+}
+.col-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.col-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.col-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+/* ─── QUOTE CARD (column item) ─── */
+.q-card {
+  background: var(--paper);
+  padding: 20px 22px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.q-card:hover { background: var(--today-bg); }
+
+.q-card-num {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: var(--ink-light);
+  opacity: 0.6;
+  margin-bottom: 8px;
+}
+
+.q-card-text {
+  font-family: var(--serif);
+  font-size: clamp(14px, 1.6vw, 18px);
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--ink);
+  flex: 1;
+  margin-bottom: 14px;
+}
+
+.q-card-rule {
+  height: 1px;
+  background: var(--rule);
+  margin-bottom: 10px;
+}
+
+.q-card-author {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+.q-card-meta {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-light);
+  line-height: 1.4;
+}
+
+.q-card-about {
+  margin-top: 10px;
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-mid);
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+}
+
+/* ─── DATE GROUP ─── */
+.date-group { margin-bottom: 0; }
+
+/* ─── ARCHIVE DATE HEADER ─── */
+.archive-date-header {
+  display: flex;
+  align-items: stretch;
+  margin-top: 28px;
+  margin-bottom: 0;
+  border: 1px solid var(--rule-heavy);
+  border-bottom: none;
+  background: var(--paper-dark);
+}
+.archive-date-cal {
+  background: var(--ink-mid);
+  color: var(--paper);
+  padding: 10px 16px;
+  text-align: center;
+  min-width: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.archive-date-cal-month {
+  font-family: var(--sans);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.archive-date-cal-day {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+}
+.archive-date-cal-year {
+  font-family: var(--mono);
+  font-size: 8px;
+  opacity: 0.5;
+  margin-top: 2px;
+}
+.archive-date-info {
+  padding: 10px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  border-left: 1px solid var(--rule);
+}
+.archive-date-label {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  font-style: italic;
+}
+.archive-date-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-light);
+  letter-spacing: 0.5px;
+}
+
+/* ─── PULL QUOTE (single wide card) ─── */
+.pull-quote {
+  background: var(--paper-dark);
+  border: 1px solid var(--rule-heavy);
+  border-top: 3px solid var(--ink-mid);
+  padding: 24px 28px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.pull-quote:hover { background: var(--paper-darkest); }
+.pull-quote-text {
+  font-family: var(--serif);
+  font-size: clamp(16px, 2.2vw, 22px);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+.pull-quote-attr {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+/* ─── MODAL / EXPANDED VIEW ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,18,8,0.72);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+.modal {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  max-width: 620px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.3s;
+  box-shadow: 8px 8px 0 var(--ink);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      rgba(26,18,8,0.04) 27px,
+      rgba(26,18,8,0.04) 28px
+    );
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+
+.modal-header {
+  padding: 24px 28px 16px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--paper-dark);
+}
+.modal-kicker {
+  font-family: var(--sans);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 8px;
+}
+.modal-headline {
+  font-family: var(--serif);
+  font-size: clamp(20px, 3vw, 30px);
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.modal-body { padding: 20px 28px 28px; }
+.modal-author-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.modal-author-initial {
+  width: 44px; height: 44px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--serif);
+  font-size: 20px;
+  font-style: italic;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.modal-author-name {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.modal-author-contrib {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-light);
+  margin-top: 2px;
+}
+.modal-about-label {
+  font-family: var(--sans);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  margin-bottom: 8px;
+}
+.modal-about-text {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink-mid);
+}
+.modal-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 32px; height: 32px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--sans);
+  transition: background 0.2s;
+}
+.modal-close:hover { background: var(--ink-mid); }
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.modal-btn {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border: 1.5px solid var(--ink);
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  display: inline-block;
+}
+.modal-btn:hover { background: var(--ink); color: var(--paper); }
+.modal-btn.primary { background: var(--ink); color: var(--paper); }
+.modal-btn.primary:hover { background: var(--ink-mid); }
+
+/* ─── LOADING ─── */
+.loading-page {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--ink-light);
+}
+.loading-spinner {
+  font-family: var(--fraktur);
+  font-size: 48px;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+.loading-text {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ink-light);
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 16px;
+  border: 1px dashed var(--rule-heavy);
+  margin-top: 20px;
+}
+
+/* ─── FOOTER ─── */
+.site-footer {
+  background: var(--ink);
+  color: var(--paper);
+  text-align: center;
+  padding: 20px;
+  font-family: var(--sans);
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--paper-dark); }
+::-webkit-scrollbar-thumb { background: var(--ink-mid); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .col-grid.cols-3 { grid-template-columns: 1fr 1fr; }
+  .col-grid.cols-4 { grid-template-columns: 1fr 1fr; }
+  .today-hero { padding: 22px 18px 20px; }
+  .modal-body, .modal-header { padding-left: 18px; padding-right: 18px; }
+}
+
+@media (max-width: 500px) {
+  .col-grid.cols-2,
+  .col-grid.cols-3,
+  .col-grid.cols-4 { grid-template-columns: 1fr; }
+  .masthead-meta { flex-direction: column; gap: 4px; text-align: center; }
+  .archive-date-header { flex-direction: column; }
+  .archive-date-cal { flex-direction: row; gap: 10px; padding: 8px 14px; }
+}
+
+/* ─── STAGGER ANIMATION ─── */
+.q-card, .pull-quote {
+  animation: fadeUp 0.4s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── MASTHEAD ─── -->
+<header class="masthead">
+  <div class="masthead-meta">
+    <span class="masthead-dateline" id="mastDateline">—</span>
+    <span class="masthead-edition">Student Edition</span>
+    <span id="mastCount" style="font-family:var(--mono);font-size:9px;">— quotes</span>
+  </div>
+
+  <div class="masthead-title">A Quote A Day</div>
+
+  <div class="masthead-rule-ornament">
+    <span class="masthead-ornament">✦</span>
+  </div>
+
+  <div class="masthead-tagline">
+    Wisdom, wit &amp; wonder — collected daily from our students
+  </div>
+
+  <nav class="nav-bar">
+    <button class="nav-item active" data-view="all">All Editions</button>
+    <button class="nav-item" data-view="today">Today</button>
+    <button class="nav-item" data-view="authors">By Author</button>
+    <button class="nav-item" data-view="departments">By Department</button>
+  </nav>
+</header>
+
+<!-- ─── NEWSPAPER BODY ─── -->
+<main class="newspaper-body" id="mainContent">
+  <div class="loading-page">
+    <div class="loading-spinner">❦</div>
+    <div class="loading-text">Typesetting the morning edition…</div>
+  </div>
+</main>
+
+<!-- ─── MODAL ─── -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-header">
+      <div class="modal-kicker" id="mKicker"></div>
+      <div class="modal-headline" id="mHeadline"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-author-block">
+        <div class="modal-author-initial" id="mInitial"></div>
+        <div>
+          <div class="modal-author-name" id="mAuthor"></div>
+          <div class="modal-author-contrib" id="mContrib"></div>
+        </div>
+      </div>
+      <div id="mAboutWrap" style="display:none">
+        <div class="modal-about-label">What this means to me</div>
+        <div class="modal-about-text" id="mAbout"></div>
+      </div>
+      <div class="modal-actions">
+        <a class="modal-btn primary" id="mDiscussion" href="#" target="_blank" rel="noopener">💬 Discuss</a>
+        <button class="modal-btn" id="mShareWA" onclick="shareToWhatsApp()">📲 WhatsApp</button>
+        <button class="modal-btn" id="mShareImg" onclick="shareAsImage()">📸 Save Image</button>
+        <a class="modal-btn" href="https://andrewveda.github.io/a-quote-a-day/submissions" target="_blank">✏️ Add a Quote</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── FOOTER ─── -->
+<footer class="site-footer">A Quote A Day · Student Contributions · Est. 2026</footer>
+
+<script>
+/* ══════════════════════════════════════════════
+   CONFIG
+   ══════════════════════════════════════════════ */
+const REPO_OWNER = "AndrewVeda";
+const REPO_NAME  = "a-quote-a-day";
+const QUOTES_DIR = "quotes";
+
+/* ══════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════ */
+let allQuotes = [];      // { quote, author, contributor, department, about, date: Date, dateStr: "YYYY-MM-DD", filename }
+let currentView = 'all';
+
+/* ══════════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', async () => {
+  setDateline();
+  await fetchQuotes();
+  setupNav();
+  renderView('all');
+});
+
+function setDateline() {
+  const now = new Date();
+  const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('mastDateline').textContent = now.toLocaleDateString('en-US', opts).toUpperCase();
+}
+
+/* ══════════════════════════════════════════════
+   FETCH & PARSE
+   ══════════════════════════════════════════════ */
+async function fetchQuotes() {
+  try {
+    const res   = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${QUOTES_DIR}`);
+    const files = await res.json();
+    const mdFiles = files.filter(f => f.name.endsWith('.md'));
+
+    const promises = mdFiles.map(async f => {
+      const raw = await fetch(f.download_url).then(r => r.text());
+      const q   = parseMarkdown(raw, f.name);
+      return q;
+    });
+
+    const results = await Promise.all(promises);
+    allQuotes = results.filter(Boolean);
+
+    // Sort newest first
+    allQuotes.sort((a, b) => b.date - a.date);
+
+    document.getElementById('mastCount').textContent = `${allQuotes.length} quotes`;
+  } catch (e) {
+    console.error(e);
+    document.getElementById('mainContent').innerHTML =
+      '<div class="empty-state">Could not fetch the morning edition. Please check your connection.</div>';
+  }
+}
+
+function parseMarkdown(md, filename) {
+  const match = md.match(/---([\s\S]*?)---/);
+  if (!match) return null;
+
+  const lines = match[1].split('\n');
+  const data  = {};
+  lines.forEach(l => {
+    const [k, ...v] = l.split(':');
+    if (k && v.length) data[k.trim()] = v.join(':').trim();
+  });
+
+  // Extract date from filename: YYYY-MM-DD_...
+  const dateMatch = filename.match(/^(\d{4}-\d{2}-\d{2})/);
+  const dateStr   = dateMatch ? dateMatch[1] : null;
+  const date      = dateStr ? new Date(dateStr + 'T00:00:00') : new Date(0);
+
+  return {
+    quote:       data.quote       || '',
+    author:      data.author      || 'Unknown',
+    contributor: data.contributor || 'A student',
+    department:  data.department  || '',
+    about:       data.what_it_means_to_me || data.about || '',
+    date,
+    dateStr: dateStr || 'Unknown',
+    filename
+  };
+}
+
+/* ══════════════════════════════════════════════
+   NAV
+   ══════════════════════════════════════════════ */
+function setupNav() {
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentView = btn.dataset.view;
+      renderView(currentView);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════
+   VIEWS
+   ══════════════════════════════════════════════ */
+function renderView(view) {
+  const main = document.getElementById('mainContent');
+  main.innerHTML = '';
+
+  if (!allQuotes.length) {
+    main.innerHTML = '<div class="empty-state">No quotes found in the archive.</div>';
+    return;
+  }
+
+  if (view === 'all')         renderAll(main);
+  else if (view === 'today')  renderToday(main);
+  else if (view === 'authors')      renderGrouped(main, 'author');
+  else if (view === 'departments')  renderGrouped(main, 'department');
+}
+
+/* ─── ALL: chronological newspaper ─── */
+function renderAll(container) {
+  const todayStr = todayDateStr();
+  const todayQs  = allQuotes.filter(q => q.dateStr === todayStr);
+  const pastQs   = allQuotes.filter(q => q.dateStr !== todayStr);
+
+  // TODAY SECTION
+  if (todayQs.length) {
+    const todayBanner = el('div', 'today-banner', '★  Today\'s Edition  ★');
+    container.appendChild(todayBanner);
+    renderTodaySection(container, todayQs);
+  }
+
+  // PAST: group by date
+  if (pastQs.length) {
+    // Section header
+    const sectionLabel = makeSectionLabel('Past Contributions', 'Archive');
+    container.appendChild(sectionLabel);
+
+    const byDate = groupByDate(pastQs);
+
+    byDate.forEach(({ dateStr, quotes }) => {
+      const group = el('div', 'date-group');
+
+      // Date header
+      const dateHeader = makeArchiveDateHeader(dateStr, quotes.length);
+      group.appendChild(dateHeader);
+
+      // Grid of quotes
+      const cols = Math.min(quotes.length, 3);
+      const grid = el('div', `col-grid cols-${cols}`);
+
+      quotes.forEach((q, i) => {
+        const card = makeQCard(q, i);
+        grid.appendChild(card);
+        card.style.animationDelay = `${i * 60}ms`;
+      });
+
+      group.appendChild(grid);
+      container.appendChild(group);
+    });
+  }
+
+  if (!todayQs.length && !pastQs.length) {
+    container.innerHTML = '<div class="empty-state">No quotes in the archive yet.</div>';
+  }
+}
+
+/* ─── TODAY ONLY ─── */
+function renderToday(container) {
+  const todayStr = todayDateStr();
+  const todayQs  = allQuotes.filter(q => q.dateStr === todayStr);
+
+  if (!todayQs.length) {
+    container.innerHTML = `<div class="empty-state">No quotes submitted today yet.<br><br><a href="https://andrewveda.github.io/a-quote-a-day/submissions" style="color:var(--ink);font-style:normal;font-family:var(--sans);font-size:12px;letter-spacing:2px;">✏️ Be the first — Add yours</a></div>`;
+    return;
+  }
+
+  const banner = el('div', 'today-banner', `★  Today's Edition  —  ${todayQs.length} contribution${todayQs.length !== 1 ? 's' : ''}  ★`);
+  container.appendChild(banner);
+  renderTodaySection(container, todayQs);
+}
+
+function renderTodaySection(container, qs) {
+  // Hero: first quote
+  const hero = makeTodayHero(qs[0], 0);
+  container.appendChild(hero);
+
+  // Rest in columns
+  if (qs.length > 1) {
+    const rest = qs.slice(1);
+    const cols = Math.min(rest.length, 3);
+    const grid = el('div', `col-grid cols-${cols}`);
+    rest.forEach((q, i) => {
+      // Alternate between full card and pull-quote style
+      const card = (i % 3 === 1 && rest.length > 2) ? makePullQuote(q, i + 1) : makeQCard(q, i + 1);
+      grid.appendChild(card);
+      card.style.animationDelay = `${(i + 1) * 80}ms`;
+    });
+    container.appendChild(grid);
+  }
+}
+
+/* ─── GROUPED (author / department) ─── */
+function renderGrouped(container, field) {
+  const label = field === 'author' ? 'By Author' : 'By Department';
+  container.appendChild(makeSectionLabel(label, `${allQuotes.length} quotes`));
+
+  const groups = {};
+  allQuotes.forEach((q, globalIdx) => {
+    const key = q[field] || 'Unknown';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push({ ...q, globalIdx });
+  });
+
+  const sortedKeys = Object.keys(groups).sort((a, b) => {
+    // Sort by count desc, then alpha
+    return groups[b].length - groups[a].length || a.localeCompare(b);
+  });
+
+  sortedKeys.forEach(key => {
+    const qs = groups[key];
+    const dateHeader = makeArchiveDateHeader(key, qs.length, true);
+    container.appendChild(dateHeader);
+
+    const cols = Math.min(qs.length, 3);
+    const grid = el('div', `col-grid cols-${cols}`);
+    qs.forEach((q, i) => {
+      const card = makeQCard(q, i);
+      grid.appendChild(card);
+      card.style.animationDelay = `${i * 60}ms`;
+    });
+    container.appendChild(grid);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   BUILDERS
+   ══════════════════════════════════════════════ */
+
+function makeTodayHero(q, idx) {
+  const div = document.createElement('div');
+  div.className = 'today-hero';
+  div.innerHTML = `
+    <div class="hero-quote-mark">"</div>
+    <div class="hero-kicker">✦ Featured Quote of the Day</div>
+    <div class="hero-quote-text">"${escHtml(q.quote)}"</div>
+    <div class="hero-byline"><strong>${escHtml(q.author)}</strong></div>
+    ${q.about ? `<div class="hero-about">${escHtml(q.about)}</div>` : ''}
+    <div class="hero-contrib">🏅 ${escHtml(q.contributor)}${q.department ? ` · ${escHtml(q.department)}` : ''}</div>
+  `;
+  div.addEventListener('click', () => openModal(q, 1));
+  div.style.cursor = 'pointer';
+  return div;
+}
+
+function makeQCard(q, displayIdx) {
+  const div = document.createElement('div');
+  div.className = 'q-card';
+  div.innerHTML = `
+    <div class="q-card-num">No. ${displayIdx + 1}</div>
+    <div class="q-card-text">"${escHtml(q.quote)}"</div>
+    <div class="q-card-rule"></div>
+    <div class="q-card-author">${escHtml(q.author)}</div>
+    <div class="q-card-meta">
+      ${escHtml(q.contributor)}${q.department ? ` · ${escHtml(q.department)}` : ''}
+      ${q.dateStr !== 'Unknown' ? `<br>${formatDateFull(q.dateStr)}` : ''}
+    </div>
+    ${q.about ? `<div class="q-card-about">${escHtml(q.about)}</div>` : ''}
+  `;
+  div.addEventListener('click', () => openModal(q, displayIdx + 1));
+  return div;
+}
+
+function makePullQuote(q, displayIdx) {
+  const div = document.createElement('div');
+  div.className = 'pull-quote';
+  div.innerHTML = `
+    <div class="pull-quote-text">"${escHtml(q.quote)}"</div>
+    <div class="pull-quote-attr">— ${escHtml(q.author)}</div>
+  `;
+  div.addEventListener('click', () => openModal(q, displayIdx + 1));
+  return div;
+}
+
+function makeSectionLabel(title, sub) {
+  const wrap = document.createElement('div');
+  wrap.className = 'section-label';
+  wrap.innerHTML = `
+    <div class="section-label-text">${escHtml(title)}</div>
+    <div class="section-label-rule"></div>
+    <div class="section-label-date">${escHtml(sub)}</div>
+  `;
+  return wrap;
+}
+
+function makeArchiveDateHeader(dateStrOrLabel, count, isLabel = false) {
+  const wrap = document.createElement('div');
+  wrap.className = 'archive-date-header';
+
+  let calHTML;
+  if (isLabel) {
+    const initials = dateStrOrLabel.split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase();
+    calHTML = `
+      <div class="archive-date-cal">
+        <div class="archive-date-cal-month" style="font-size:16px;opacity:1;">${escHtml(initials)}</div>
+      </div>
+    `;
+  } else {
+    const d = new Date(dateStrOrLabel + 'T00:00:00');
+    const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+    const day   = d.getDate();
+    const year  = d.getFullYear();
+    calHTML = `
+      <div class="archive-date-cal">
+        <div class="archive-date-cal-month">${month}</div>
+        <div class="archive-date-cal-day">${day}</div>
+        <div class="archive-date-cal-year">${year}</div>
+      </div>
+    `;
+  }
+
+  const fullLabel = isLabel ? dateStrOrLabel : formatDateFull(dateStrOrLabel);
+  const subLabel  = `${count} contribution${count !== 1 ? 's' : ''}`;
+
+  wrap.innerHTML = `
+    ${calHTML}
+    <div class="archive-date-info">
+      <div class="archive-date-label">${escHtml(fullLabel)}</div>
+      <div class="archive-date-sub">${subLabel}</div>
+    </div>
+  `;
+  return wrap;
+}
+
+/* openModal is defined later in the share section */
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+/* ══════════════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════════════ */
+function todayDateStr() {
+  const now = new Date();
+  const y   = now.getFullYear();
+  const m   = String(now.getMonth() + 1).padStart(2, '0');
+  const d   = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function formatDateFull(dateStr) {
+  if (!dateStr || dateStr === 'Unknown') return 'Unknown Date';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function groupByDate(quotes) {
+  const map = {};
+  quotes.forEach(q => {
+    const key = q.dateStr || 'Unknown';
+    if (!map[key]) map[key] = [];
+    map[key].push(q);
+  });
+  // Sort dates descending
+  return Object.keys(map)
+    .sort((a, b) => b.localeCompare(a))
+    .map(dateStr => ({ dateStr, quotes: map[dateStr] }));
+}
+
+function el(tag, className, text = '') {
+  const d = document.createElement(tag);
+  d.className = className;
+  if (text) d.textContent = text;
+  return d;
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+/* ══════════════════════════════════════════════
+   SHARE AS IMAGE / WHATSAPP
+   ══════════════════════════════════════════════ */
+let _currentShareQuote = null;
+
+function openModal(q, num) {
+  _currentShareQuote = q;
+  document.getElementById('mKicker').textContent   = `Quote #${num} · ${formatDateFull(q.dateStr)}`;
+  document.getElementById('mHeadline').textContent = `"${q.quote}"`;
+  document.getElementById('mInitial').textContent  = q.author[0] || '?';
+  document.getElementById('mAuthor').textContent   = q.author;
+  document.getElementById('mContrib').textContent  = `Contributed by ${q.contributor}${q.department ? ` (${q.department})` : ''}`;
+
+  const aboutWrap = document.getElementById('mAboutWrap');
+  if (q.about) {
+    document.getElementById('mAbout').textContent = q.about;
+    aboutWrap.style.display = 'block';
+  } else {
+    aboutWrap.style.display = 'none';
+  }
+
+  const globalIdx = allQuotes.indexOf(q);
+  document.getElementById('mDiscussion').href =
+    `https://github.com/AndrewVeda/a-quote-a-day/discussions?discussions_q=Quote+%23${globalIdx + 1}`;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function populateShareCard(q) {
+  document.getElementById('sc-quote').textContent   = `"${q.quote}"`;
+  document.getElementById('sc-author').textContent  = `— ${q.author}`;
+  document.getElementById('sc-contrib').textContent =
+    `Contributed by ${q.contributor}${q.department && q.department !== 'Unknown' ? ` (${q.department})` : ''}`;
+  document.getElementById('sc-about').textContent   = q.about || '';
+  document.getElementById('sc-date').textContent    = formatDateFull(q.dateStr);
+}
+
+async function generateImage() {
+  const q = _currentShareQuote;
+  if (!q) return null;
+
+  populateShareCard(q);
+  const node = document.getElementById('shareCard');
+
+  // Wait a frame for paint
+  await new Promise(r => requestAnimationFrame(r));
+  await new Promise(r => setTimeout(r, 80));
+
+  const canvas = await html2canvas(node, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#f4edd8',
+    logging: false,
+  });
+
+  return new Promise(res => canvas.toBlob(res, 'image/png'));
+}
+
+async function shareAsImage() {
+  try {
+    document.getElementById('mShareImg').textContent = '⏳ Generating…';
+    const blob = await generateImage();
+    document.getElementById('mShareImg').textContent = '📸 Save Image';
+
+    if (!blob) throw new Error('No blob');
+    const file = new File([blob], 'a-quote-a-day.png', { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'A Quote A Day' });
+    } else {
+      // Fallback: download
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href = url; a.download = 'a-quote-a-day.png'; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }
+  } catch (err) {
+    console.error(err);
+    document.getElementById('mShareImg').textContent = '📸 Save Image';
+    alert('Could not generate image. Try a different browser.');
+  }
+}
+
+async function shareToWhatsApp() {
+  const q = _currentShareQuote;
+  if (!q) return;
+
+  document.getElementById('mShareWA').textContent = '⏳ Preparing…';
+
+  try {
+    const blob = await generateImage();
+    document.getElementById('mShareWA').textContent = '📲 WhatsApp';
+
+    const file = new File([blob], 'a-quote-a-day.png', { type: 'image/png' });
+
+    // On mobile (Android/iOS), Web Share API with files will open the native share sheet
+    // where WhatsApp appears. This is the most reliable method.
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'A Quote A Day',
+        text: `"${q.quote}" — ${q.author}\n\nShared via A Quote A Day`,
+      });
+      return;
+    }
+
+    // Desktop fallback: open WhatsApp web with text, prompt user to attach saved image
+    const text = encodeURIComponent(`"${q.quote}"\n\n— ${q.author}\n\nContributed by ${q.contributor} · A Quote A Day`);
+    const waUrl = `https://wa.me/?text=${text}`;
+
+    // Also trigger image download so they can attach it
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href = url; a.download = 'a-quote-a-day.png'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+    // Small delay then open WhatsApp
+    setTimeout(() => window.open(waUrl, '_blank'), 400);
+
+  } catch (err) {
+    // If share was cancelled or failed, do text-only fallback
+    document.getElementById('mShareWA').textContent = '📲 WhatsApp';
+    if (err.name !== 'AbortError') {
+      const text = encodeURIComponent(`"${q.quote}"\n\n— ${q.author}\n\nContributed by ${q.contributor} · A Quote A Day`);
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+  }
+}
+</script>
+
+<!-- ─── SHARE CARD (off-screen, rendered by html2canvas) ─── -->
+<div id="shareCard" style="
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 800px;
+  height: 800px;
+  background: #f4edd8;
+  color: #1a1208;
+  font-family: 'Playfair Display', Georgia, serif;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+">
+  <!-- Aged paper texture stripes -->
+  <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(26,18,8,0.04) 27px,rgba(26,18,8,0.04) 28px);pointer-events:none;"></div>
+
+  <!-- Top masthead bar -->
+  <div style="background:#1a1208;color:#f4edd8;text-align:center;padding:14px 20px;flex-shrink:0;position:relative;z-index:2;">
+    <div style="font-family:'UnifrakturMaguntia',serif;font-size:38px;letter-spacing:2px;line-height:1;">A Quote A Day</div>
+    <div id="sc-date" style="font-family:'DM Mono',monospace;font-size:10px;opacity:0.6;letter-spacing:2px;margin-top:4px;text-transform:uppercase;"></div>
+  </div>
+
+  <!-- Double rule -->
+  <div style="border-bottom:3px double rgba(26,18,8,0.5);flex-shrink:0;"></div>
+
+  <!-- Content area -->
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 56px;position:relative;z-index:2;">
+
+    <!-- Big decorative quote mark -->
+    <div style="font-family:'Playfair Display',serif;font-size:160px;line-height:0.5;color:#1a1208;opacity:0.07;position:absolute;top:30px;left:40px;user-select:none;">"</div>
+
+    <!-- Kicker -->
+    <div style="font-family:'Raleway',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#8b1a1a;margin-bottom:18px;">✦ Student Contribution</div>
+
+    <!-- Quote text with left border -->
+    <div id="sc-quote" style="
+      font-family:'Playfair Display',serif;
+      font-size:28px;
+      font-style:italic;
+      line-height:1.5;
+      color:#1a1208;
+      border-left:4px solid #1a1208;
+      padding-left:20px;
+      margin-bottom:24px;
+      position:relative;
+      z-index:1;
+    "></div>
+
+    <!-- Divider -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div style="flex:0 0 40px;height:1px;background:#1a1208;opacity:0.3;"></div>
+      <div style="width:6px;height:6px;background:#8b6914;transform:rotate(45deg);opacity:0.7;"></div>
+      <div style="flex:1;height:1px;background:#1a1208;opacity:0.3;"></div>
+    </div>
+
+    <!-- Author -->
+    <div id="sc-author" style="font-family:'Raleway',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#1a1208;margin-bottom:6px;"></div>
+
+    <!-- About -->
+    <div id="sc-about" style="font-family:'IM Fell English','Times New Roman',serif;font-style:italic;font-size:15px;line-height:1.55;color:#3d2e10;margin-bottom:16px;max-height:80px;overflow:hidden;"></div>
+
+    <!-- Contributor -->
+    <div id="sc-contrib" style="font-family:'Raleway',sans-serif;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#8b6914;"></div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div style="background:#e8dfc4;border-top:2px solid rgba(26,18,8,0.2);padding:10px 20px;text-align:center;flex-shrink:0;position:relative;z-index:2;">
+    <div style="font-family:'Raleway',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#6b5c3e;opacity:0.7;">Wisdom shared daily · Student Edition</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</body>
+</html>
