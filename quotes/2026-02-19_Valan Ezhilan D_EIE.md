@@ -1,9 +1,9 @@
 ---
-quote: “There is nothing noble in being superior to your fellow man; true nobility is being superior to your former self.” 
+quote: There is nothing noble in being superior to your fellow man; true nobility is being superior to your former self.
 
 author: - Ernest Hemingway
 
-what_it_means_to_me: Failer Is Steping Stone Of Success 
+what_it_means_to_me: Failure is the stepping stone to success 
 
 contributor: Valan Ezhilan D
 
