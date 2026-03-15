@@ -348,12 +348,22 @@ body::after {
 }
 .dir-row.expanded .dir-row-chevron { transform: rotate(90deg); color: var(--gold); }
 
-.dir-row-quotes {
+  .dir-row-quotes {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.38s cubic-bezier(.4,0,.2,1);
 }
-.dir-row.expanded .dir-row-quotes { max-height: 800px; }
+.dir-row.expanded .dir-row-quotes {
+  max-height: 340px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-border) transparent;
+}
+.dir-row.expanded .dir-row-quotes::-webkit-scrollbar { width: 3px; }
+.dir-row.expanded .dir-row-quotes::-webkit-scrollbar-thumb {
+  background: var(--gold-border);
+  border-radius: 2px;
+}
 
 .dir-quote {
   margin: 0 12px 8px;
