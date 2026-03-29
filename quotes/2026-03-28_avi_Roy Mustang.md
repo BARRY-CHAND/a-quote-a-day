@@ -4,7 +4,7 @@ author: Roy Mustang
 contributor: Avi
 department: Cyber Security
 date: 2026-03-28
-source: Fullmetal Alchemist: Brotherhood(anime)
+source: Fullmetal Alchemist: Brotherhood anime
 tags: Imperfection,Acceptance,Hope,Reality
 about: The world isn’t perfect and has many flaws.But it still gives us chances to live and move forward.
 ---
