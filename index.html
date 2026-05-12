@@ -1004,6 +1004,11 @@ body::after {
   gap: 8px;
   flex-wrap: wrap;
 }
+  .dc-giscus-wrap {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
 .dc-btn {
   font-family: var(--sans);
   font-size: 10px;
@@ -1789,6 +1794,22 @@ function openDeck(quotes, startIdx) {
           <button class="dc-btn dc-btn-img">📸 Share</button>
           <a class="dc-btn" href="https://andrewveda.github.io/a-quote-a-day/submissions" target="_blank">✏️ Add a Quote</a>
         </div>
+        <script src="https://giscus.app/client.js"
+        data-repo="andrewveda/a-quote-a-day"
+        data-repo-id="R_kgDORI8-yw"
+        data-category="General"
+        data-category-id="DIC_kwDORI8-y84C1-Jq"
+        data-mapping="specific"
+        data-term="Quote #${globalNum}"
+        data-strict="1"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
       </div>`;
 
     slide.querySelector('.dc-btn-wa').addEventListener('click', () => {
@@ -1799,6 +1820,17 @@ function openDeck(quotes, startIdx) {
     });
 
     track.appendChild(slide);
+  const giscusScript = slide.querySelector('script[src="https://giscus.app/client.js"]');
+
+if (giscusScript) {
+  const newScript = document.createElement('script');
+
+  Array.from(giscusScript.attributes).forEach(attr => {
+    newScript.setAttribute(attr.name, attr.value);
+  });
+
+  giscusScript.replaceWith(newScript);
+}
   });
 
   // Build dots
