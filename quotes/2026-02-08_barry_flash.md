@@ -1,5 +1,5 @@
 ---
-quote: Life doesn’t give us purpose. We give life purpose.
+quote: Life doesn’t give us purpose. We give life purpose. 
 author: Barry Allen (The Flash)
 contributor: Barry (Pacman)
 department: Cyber Security
