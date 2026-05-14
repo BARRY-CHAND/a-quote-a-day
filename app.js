@@ -200,7 +200,7 @@ function updateDeckPosition(animate = true) {
 
     const q = currentView[deckIdx];
     window.history.replaceState(null, null, `?id=${q.id}`);
-}
+
     loadGiscus(deckIdx);
 }
 
