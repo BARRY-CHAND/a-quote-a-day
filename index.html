@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
@@ -9,35 +9,33 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* PWA design system — matching your existing app */
   --obsidian: #ffffff;
   --deep:     #faf7f2;
   --surface:  #ffffff;
   --surface2: #f5efe6;
 
-  --gold:       #c9a84c;
-  --gold-light: #e8c97a;
-  --gold-dim:   rgba(201,168,76,0.12);
+  --gold:        #c9a84c;
+  --gold-light:  #e8c97a;
+  --gold-dim:    rgba(201,168,76,0.12);
   --gold-border: rgba(201,168,76,0.35);
 
-  --crimson:    #7A0019;
+  --crimson: #7A0019;
 
   --text:       #2a2a2a;
   --text-muted: #7a766f;
   --text-dim:   #b0a99f;
 
-  --border:     rgba(0,0,0,0.06);
+  --border:      rgba(0,0,0,0.06);
   --border-gold: rgba(201,168,76,0.35);
-  --shadow-sm:  0 2px 8px rgba(0,0,0,0.06);
-  --shadow-md:  0 8px 24px rgba(0,0,0,0.08);
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md:   0 8px 24px rgba(0,0,0,0.08);
   --shadow-gold: 0 8px 24px rgba(201,168,76,0.18);
 
-  --serif: 'Playfair Display', Georgia, serif;
-  --mono:  'DM Mono', monospace;
-  --sans:  'Raleway', sans-serif;
+  --serif:   'Playfair Display', Georgia, serif;
+  --mono:    'DM Mono', monospace;
+  --sans:    'Raleway', sans-serif;
   --fraktur: 'UnifrakturMaguntia', serif;
 
-  /* Aliases for share card / legacy refs */
   --ink:        var(--text);
   --ink-mid:    #4a3f2e;
   --ink-light:  var(--text-muted);
@@ -46,6 +44,51 @@
   --rule:       var(--border);
   --rule-heavy: rgba(0,0,0,0.15);
   --red:        var(--crimson);
+
+  /* Header shrink transition */
+  --header-pad-v: 14px;
+  --header-title-size: clamp(28px, 5.5vw, 50px);
+}
+
+/* ── DARK MODE ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --deep:     #18160f;
+    --surface:  #1f1c14;
+    --surface2: #282318;
+
+    --gold-dim:    rgba(201,168,76,0.15);
+    --gold-border: rgba(201,168,76,0.28);
+
+    --text:       #e8e0d0;
+    --text-muted: #9a9080;
+    --text-dim:   #5a5248;
+
+    --border:      rgba(255,255,255,0.06);
+    --rule-heavy:  rgba(255,255,255,0.12);
+
+    --shadow-sm:   0 2px 8px rgba(0,0,0,0.3);
+    --shadow-md:   0 8px 24px rgba(0,0,0,0.4);
+    --shadow-gold: 0 8px 24px rgba(201,168,76,0.12);
+  }
+  body::after { opacity: 0.4; }
+
+  .masthead,
+  .nav-bar {
+    background: rgba(24,21,14,0.93);
+    border-color: rgba(255,255,255,0.07);
+  }
+  .today-hero,
+  .q-card,
+  .deck-card {
+    background: linear-gradient(145deg, #1f1c14, #282318);
+  }
+  .pull-quote {
+    background: linear-gradient(145deg, var(--gold-dim), rgba(201,168,76,0.04));
+  }
+  .archive-date-info { background: var(--surface); }
+  .dir-panel { background: linear-gradient(160deg, #1f1c14, #1a1710); }
+  #shareCard { background: #1f1c14 !important; }
 }
 
 html { scroll-behavior: smooth; }
@@ -58,7 +101,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* subtle ambient gold glow — matches your PWA */
 body::after {
   content: '';
   position: fixed;
@@ -76,15 +118,68 @@ body::after {
 
 /* ─── MASTHEAD ─── */
 .masthead {
-  background: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.94);
   backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--border);
   text-align: center;
-  padding: 16px 20px 0;
+  padding: var(--header-pad-v) 20px 0;
   position: sticky;
   top: 0;
   z-index: 50;
   box-shadow: var(--shadow-sm);
+  transition: padding 0.3s ease, box-shadow 0.3s ease;
+  will-change: padding;
+}
+
+/* Shrunk state — added via JS on scroll */
+.masthead.shrunk {
+  --header-pad-v: 6px;
+  --header-title-size: clamp(18px, 3vw, 28px);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+}
+.masthead.shrunk .masthead-meta { display: none; }
+.masthead.shrunk .masthead-rule-ornament { margin: 3px 0; }
+.masthead.shrunk .masthead-tagline { display: none; }
+.masthead.shrunk .masthead-title { font-size: var(--header-title-size); margin-bottom: 0; }
+.masthead.shrunk .discussions-banner { padding: 4px 14px 6px; }
+.masthead.shrunk .discussions-banner a { padding: 6px 14px; font-size: 10px; }
+
+/* On desktop, masthead is NOT sticky — it scrolls away naturally */
+@media (min-width: 901px) {
+  .masthead {
+    position: static;
+    box-shadow: none;
+    padding: 20px 20px 0;
+  }
+  .masthead.shrunk {
+    /* shrink only applies on mobile */
+    padding: 20px 20px 0;
+    box-shadow: none;
+  }
+  .masthead.shrunk .masthead-meta { display: flex; }
+  .masthead.shrunk .masthead-rule-ornament { margin: 8px 0; }
+  .masthead.shrunk .masthead-tagline { display: block; }
+  .masthead.shrunk .masthead-title { font-size: clamp(32px, 7vw, 60px); margin-bottom: 2px; }
+  .masthead.shrunk .discussions-banner { padding: 10px 14px 14px; }
+  .masthead.shrunk .discussions-banner a { padding: 10px 20px; font-size: 11px; }
+
+  /* Desktop nav is not sticky either — it sits below masthead naturally.
+     We add a small desktop sticky nav bar for just the tabs */
+}
+
+/* Desktop: sticky thin tab bar only */
+@media (min-width: 901px) {
+  .sticky-tab-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
 }
 
 .masthead-meta {
@@ -99,8 +194,8 @@ body::after {
   padding-bottom: 10px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 8px;
+  transition: all 0.3s;
 }
-
 .masthead-dateline { color: var(--text-muted); }
 .masthead-edition {
   background: linear-gradient(135deg, var(--gold), var(--gold-light));
@@ -116,18 +211,20 @@ body::after {
 
 .masthead-title {
   font-family: 'IM Fell English', Georgia, serif;
-  font-style: italic; /* optional — looks beautiful in italic */
+  font-style: italic;
   font-size: clamp(32px, 7vw, 60px);
   color: var(--text);
   letter-spacing: 2px;
   line-height: 1;
   margin-bottom: 2px;
+  transition: font-size 0.3s ease;
 }
 .masthead-rule-ornament {
   display: flex;
   align-items: center;
   gap: 12px;
   margin: 8px 0;
+  transition: margin 0.3s ease;
 }
 .masthead-rule-ornament::before,
 .masthead-rule-ornament::after {
@@ -136,17 +233,19 @@ body::after {
   height: 1px;
   background: var(--gold-border);
 }
-.masthead-ornament {
-  font-size: 14px;
-  color: var(--gold);
-}
-
+.masthead-ornament { font-size: 14px; color: var(--gold); }
 .masthead-tagline {
   font-family: var(--sans);
   font-size: 11px;
   color: var(--text-muted);
   letter-spacing: 0.5px;
   padding-bottom: 10px;
+  transition: all 0.3s;
+}
+
+/* ─── STICKY TAB BAR WRAPPER ─── */
+.sticky-tab-bar {
+  /* mobile: just a normal block inside masthead */
 }
 
 /* ─── NAV / QUICK-TABS ─── */
@@ -156,7 +255,7 @@ body::after {
   justify-content: center;
   gap: 6px;
   border-top: 1px solid var(--border);
-  background: rgba(255,255,255,0.95);
+  background: transparent;
   overflow-x: auto;
   scrollbar-width: none;
   padding: 8px 14px;
@@ -198,6 +297,70 @@ body::after {
   box-shadow: 0 3px 10px rgba(201,168,76,0.3);
 }
 
+/* ─── FEED SEARCH BAR ─── */
+.feed-search-wrap {
+  max-width: 560px;
+  margin: 24px auto 0;
+  padding: 0 16px;
+  position: relative;
+  z-index: 1;
+}
+.feed-search-inner {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  padding: 0 16px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.feed-search-inner:focus-within {
+  border-color: var(--gold-border);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+}
+.feed-search-icon {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-right: 10px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+.feed-search {
+  flex: 1;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text);
+  background: none;
+  border: none;
+  outline: none;
+  padding: 11px 0;
+}
+.feed-search::placeholder { color: var(--text-dim); }
+.feed-search-clear {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  display: none;
+  line-height: 1;
+  transition: color 0.2s;
+}
+.feed-search-clear:hover { color: var(--text-muted); }
+.feed-search-clear.visible { display: block; }
+.feed-search-count {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  text-align: center;
+  margin-top: 8px;
+  height: 14px;
+  transition: opacity 0.2s;
+}
+
 /* ─── DIRECTORY PANEL ─── */
 .dir-backdrop {
   position: fixed; inset: 0;
@@ -216,7 +379,7 @@ body::after {
   width: 380px;
   max-width: 92vw;
   height: 100dvh;
-  background: linear-gradient(160deg, #ffffff, #f8f2e8);
+  background: linear-gradient(160deg, var(--surface), var(--surface2));
   border-left: 1px solid var(--gold-border);
   box-shadow: -12px 0 48px rgba(0,0,0,0.12);
   z-index: 160;
@@ -255,7 +418,6 @@ body::after {
   font-size: 22px;
   font-weight: 900;
   color: var(--text);
-  margin-bottom: 0;
 }
 
 .dir-search-wrap {
@@ -348,7 +510,7 @@ body::after {
 }
 .dir-row.expanded .dir-row-chevron { transform: rotate(90deg); color: var(--gold); }
 
-  .dir-row-quotes {
+.dir-row-quotes {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.38s cubic-bezier(.4,0,.2,1);
@@ -398,7 +560,6 @@ body::after {
   letter-spacing: 1px;
   color: var(--text-muted);
 }
-
 .dir-empty {
   text-align: center;
   padding: 48px 0;
@@ -489,7 +650,7 @@ body::after {
 
 /* ─── TODAY HERO QUOTE ─── */
 .today-hero {
-  background: linear-gradient(145deg, #ffffff, #f8f2e8);
+  background: linear-gradient(145deg, var(--surface), var(--surface2));
   border: 1px solid var(--border);
   border-top: 4px solid var(--gold);
   border-radius: 0 0 16px 16px;
@@ -526,9 +687,6 @@ body::after {
   color: var(--crimson);
   margin-bottom: 14px;
 }
-
-.hero-quote-mark { display: none; } /* handled by ::before */
-
 .hero-quote-text {
   font-family: var(--serif);
   font-size: clamp(20px, 3.2vw, 34px);
@@ -542,7 +700,6 @@ body::after {
   border-left: 3px solid var(--gold);
   margin-bottom: 20px;
 }
-
 .hero-byline {
   font-family: var(--serif);
   font-size: clamp(22px, 3.2vw, 34px);
@@ -552,11 +709,6 @@ body::after {
   line-height: 1.1;
   margin-top: 18px;
 }
-.hero-byline strong {
-  font-weight: 900;
-}
-
-/* Hero student name — secondary below author */
 .hero-student-name {
   font-family: var(--serif);
   font-size: clamp(16px, 2vw, 22px);
@@ -573,7 +725,6 @@ body::after {
   color: var(--gold);
   margin-top: 3px;
 }
-
 .hero-about {
   margin-top: 14px;
   font-family: var(--sans);
@@ -584,8 +735,6 @@ body::after {
   padding-top: 14px;
   border-top: 1px solid var(--border);
 }
-
-.hero-contrib { display: none; } /* replaced by hero-student-name */
 
 /* ─── COLUMN GRID ─── */
 .col-grid {
@@ -600,9 +749,9 @@ body::after {
 .col-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
 .col-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
 
-/* ─── QUOTE CARD — elevated, clearly separated ─── */
+/* ─── QUOTE CARD ─── */
 .q-card {
-  background: linear-gradient(145deg, #ffffff, #f8f2e8);
+  background: linear-gradient(145deg, var(--surface), var(--surface2));
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 22px 22px 18px;
@@ -639,7 +788,6 @@ body::after {
   margin-bottom: 10px;
   text-transform: uppercase;
 }
-
 .q-card-text {
   font-family: var(--serif);
   font-size: clamp(14px, 1.5vw, 17px);
@@ -649,14 +797,11 @@ body::after {
   flex: 1;
   margin-bottom: 16px;
 }
-
 .q-card-rule {
   height: 1px;
   background: var(--border);
   margin-bottom: 12px;
 }
-
-/* ── QUOTED AUTHOR — big, prominent ── */
 .q-card-author {
   font-family: var(--serif);
   font-size: 1.45rem;
@@ -665,8 +810,6 @@ body::after {
   letter-spacing: 0.2px;
   line-height: 1.1;
 }
-
-/* ── STUDENT CONTRIBUTOR — still visible, secondary ── */
 .q-card-student-name {
   font-family: var(--serif);
   font-size: 1.15rem;
@@ -685,7 +828,6 @@ body::after {
   margin-top: 3px;
   margin-bottom: 0;
 }
-
 .q-card-meta {
   font-family: var(--mono);
   font-size: 9px;
@@ -693,7 +835,6 @@ body::after {
   line-height: 1.4;
   margin-top: 2px;
 }
-
 .q-card-about {
   margin-top: 10px;
   font-family: var(--sans);
@@ -703,6 +844,14 @@ body::after {
   color: var(--text-muted);
   padding-top: 10px;
   border-top: 1px solid var(--border);
+}
+
+/* highlight matched search text */
+mark {
+  background: rgba(201,168,76,0.28);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
 }
 
 /* ─── DATE GROUP ─── */
@@ -807,14 +956,13 @@ body::after {
   color: var(--text-muted);
 }
 
-/* ════════════════════════════════════════
-   SWIPEABLE DECK VIEWER
-   ════════════════════════════════════════ */
+/* ─── DECK VIEWER ─── */
 .deck-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(20,16,10,0.78);
+  background: rgba(20,16,10,0.82);
   backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 200;
   display: flex;
   flex-direction: column;
@@ -873,16 +1021,8 @@ body::after {
   border-radius: 3px;
   box-shadow: 0 0 6px rgba(201,168,76,0.5);
 }
-.deck-track-wrap {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-}
-.deck-track {
-  display: flex;
-  height: 100%;
-  /* width set by JS based on number of slides */
-}
+.deck-track-wrap { flex: 1; overflow: hidden; position: relative; }
+.deck-track { display: flex; height: 100%; }
 .deck-slide {
   flex: 0 0 100vw;
   width: 100vw;
@@ -897,7 +1037,7 @@ body::after {
 }
 .deck-slide::-webkit-scrollbar { display: none; }
 .deck-card {
-  background: linear-gradient(145deg, #ffffff, #f8f2e8);
+  background: linear-gradient(145deg, var(--surface), var(--surface2));
   border-radius: 20px;
   border: 1px solid var(--border);
   border-top: 4px solid var(--gold);
@@ -1004,7 +1144,7 @@ body::after {
   gap: 8px;
   flex-wrap: wrap;
 }
-  .dc-giscus-wrap {
+.dc-giscus-wrap {
   margin-top: 24px;
   padding-top: 18px;
   border-top: 1px solid var(--border);
@@ -1104,6 +1244,33 @@ body::after {
   background: var(--gold-dim);
 }
 
+/* ─── DISCUSSIONS BANNER ─── */
+.discussions-banner {
+  text-align: center;
+  padding: 10px 14px 14px;
+  background: var(--deep);
+  transition: padding 0.3s ease;
+}
+.discussions-banner a {
+  display: inline-block;
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  box-shadow: var(--shadow-gold);
+  transition: all 0.25s ease;
+}
+.discussions-banner a:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
 /* ─── FOOTER ─── */
 .site-footer {
   background: var(--text);
@@ -1130,15 +1297,12 @@ body::after {
   .col-grid.cols-3 { grid-template-columns: 1fr 1fr; }
   .col-grid.cols-4 { grid-template-columns: 1fr 1fr; }
   .today-hero { padding: 22px 18px 20px; }
-  .modal-body, .modal-header { padding-left: 18px; padding-right: 18px; }
 }
-
 @media (max-width: 500px) {
   .col-grid.cols-2,
   .col-grid.cols-3,
   .col-grid.cols-4 { grid-template-columns: 1fr; }
   .masthead-meta { flex-direction: column; gap: 4px; text-align: center; }
-  .archive-date-header { flex-direction: row; }
 }
 
 /* ─── STAGGER ANIMATION ─── */
@@ -1149,42 +1313,31 @@ body::after {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-  .discussions-banner {
+
+/* No results state for search */
+.search-no-results {
   text-align: center;
-  padding: 10px 14px 14px;
-  background: var(--deep);
-}
-
-.discussions-banner a {
-  display: inline-block;
+  padding: 60px 20px 40px;
+  color: var(--text-muted);
   font-family: var(--sans);
-  font-weight: 700;
-  letter-spacing: 2px;
-  font-size: 11px;
-  text-transform: uppercase;
-  color: white;
-  text-decoration: none;
-  padding: 10px 20px;
-  border-radius: 24px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-light));
-  box-shadow: var(--shadow-gold);
-  transition: all 0.25s ease;
+  font-style: italic;
+  font-size: 15px;
+  animation: fadeUp 0.3s ease both;
 }
-
-.discussions-banner a:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.05);
-}
-
-.giscus {
-  margin-top: 22px;
+.search-no-results strong {
+  display: block;
+  font-size: 32px;
+  font-family: var(--serif);
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  font-style: normal;
 }
 </style>
 </head>
 <body>
 
 <!-- ─── MASTHEAD ─── -->
-<header class="masthead">
+<header class="masthead" id="masthead">
   <div class="masthead-meta">
     <span class="masthead-dateline" id="mastDateline">—</span>
     <span class="masthead-edition">Student Edition</span>
@@ -1197,23 +1350,32 @@ body::after {
     <span class="masthead-ornament">✦</span>
   </div>
 
-  <div class="masthead-tagline">
-    Wisdom, wit &amp; wonder — collected daily from our students
-  </div>
+  <div class="masthead-tagline">Wisdom, wit &amp; wonder — collected daily from our students</div>
 
-  <nav class="nav-bar">
-    <button class="quick-tab active" data-tab="all">✦ All</button>
-    <button class="quick-tab" data-tab="authors">Authors</button>
-    <button class="quick-tab" data-tab="contributors">Contributors</button>
-    <button class="quick-tab" data-tab="departments">Departments</button>
-  
-</nav>
-<div class="discussions-banner">
-  <a href="https://andrewveda.github.io/SRM-VEC-English-PWA/buttons/vox-forum" target="_blank">
-    💬 Discussions · Vox Forum
-  </a>
-</div>
+  <div class="sticky-tab-bar">
+    <nav class="nav-bar">
+      <button class="quick-tab active" data-tab="all">✦ All</button>
+      <button class="quick-tab" data-tab="authors">Authors</button>
+      <button class="quick-tab" data-tab="contributors">Contributors</button>
+      <button class="quick-tab" data-tab="departments">Departments</button>
+    </nav>
+    <div class="discussions-banner">
+      <a href="https://andrewveda.github.io/SRM-VEC-English-PWA/buttons/vox-forum" target="_blank">
+        💬 Discussions · Vox Forum
+      </a>
+    </div>
+  </div>
 </header>
+
+<!-- ─── FEED SEARCH ─── -->
+<div class="feed-search-wrap" id="feedSearchWrap">
+  <div class="feed-search-inner">
+    <span class="feed-search-icon">🔍</span>
+    <input class="feed-search" id="feedSearch" type="search" placeholder="Search quotes, authors, contributors…" autocomplete="off" autocorrect="off"/>
+    <button class="feed-search-clear" id="feedSearchClear" aria-label="Clear search">✕</button>
+  </div>
+  <div class="feed-search-count" id="feedSearchCount"></div>
+</div>
 
 <!-- ─── DIRECTORY BACKDROP ─── -->
 <div class="dir-backdrop" id="dirBackdrop"></div>
@@ -1238,28 +1400,21 @@ body::after {
   </div>
 </main>
 
-<!-- ─── SWIPEABLE DECK VIEWER ─── -->
+<!-- ─── DECK VIEWER ─── -->
 <div class="deck-overlay" id="deckOverlay">
-
-  <!-- Top bar -->
   <div class="deck-topbar">
     <button class="deck-close" id="deckClose">✕</button>
     <div class="deck-counter" id="deckCounter">1 / 1</div>
     <div class="deck-dots" id="deckDots"></div>
   </div>
-
-  <!-- Track — slides live here -->
   <div class="deck-track-wrap">
     <div class="deck-track" id="deckTrack"></div>
   </div>
-
-  <!-- Arrow nav -->
   <button class="deck-arrow deck-arrow-prev" id="deckPrev">‹</button>
   <button class="deck-arrow deck-arrow-next" id="deckNext">›</button>
-
 </div>
 
-<!-- ─── FOOTER ─── -->
+<!-- ─── FOOTER ─── */
 <footer class="site-footer">A Quote A Day · Student Contributions · Est. 2026</footer>
 
 <script>
@@ -1273,24 +1428,103 @@ const QUOTES_DIR = "quotes";
 /* ══════════════════════════════════════════════
    STATE
    ══════════════════════════════════════════════ */
-let allQuotes = [];      // { quote, author, contributor, department, about, date: Date, dateStr: "YYYY-MM-DD", filename }
+let allQuotes = [];
 let currentView = 'all';
-let _lastRenderedQuotes = []; // tracks which quotes are in current view for deck context
+let _lastRenderedQuotes = [];
+let _searchQuery = '';
+
+/* ══════════════════════════════════════════════
+   GISCUS TERM — quote text truncated to 80 chars
+   ══════════════════════════════════════════════ */
+function giscusTerm(q) {
+  const raw = q.quote || '';
+  // Truncate to 80 chars at word boundary
+  if (raw.length <= 80) return raw;
+  const cut = raw.slice(0, 80).replace(/\s\S*$/, '');
+  return cut + '…';
+}
 
 /* ══════════════════════════════════════════════
    INIT
    ══════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
   setDateline();
+  setupStickyHeader();
+  setupFeedSearch();
   await fetchQuotes();
   setupNav();
   renderView('all');
 });
 
 function setDateline() {
-  const now = new Date();
+  const now  = new Date();
   const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   document.getElementById('mastDateline').textContent = now.toLocaleDateString('en-US', opts).toUpperCase();
+}
+
+/* ══════════════════════════════════════════════
+   STICKY HEADER SHRINK (mobile only)
+   ══════════════════════════════════════════════ */
+function setupStickyHeader() {
+  const header = document.getElementById('masthead');
+  let ticking  = false;
+
+  // Only shrink on mobile
+  const mq = window.matchMedia('(max-width: 900px)');
+
+  function onScroll() {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        if (mq.matches) {
+          header.classList.toggle('shrunk', window.scrollY > 60);
+        } else {
+          header.classList.remove('shrunk');
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+}
+
+/* ══════════════════════════════════════════════
+   FEED SEARCH
+   ══════════════════════════════════════════════ */
+function setupFeedSearch() {
+  const input = document.getElementById('feedSearch');
+  const clear = document.getElementById('feedSearchClear');
+  const count = document.getElementById('feedSearchCount');
+
+  input.addEventListener('input', () => {
+    _searchQuery = input.value.trim();
+    clear.classList.toggle('visible', _searchQuery.length > 0);
+    if (currentView === 'all') renderView('all');
+  });
+
+  clear.addEventListener('click', () => {
+    input.value  = '';
+    _searchQuery = '';
+    clear.classList.remove('visible');
+    count.textContent = '';
+    if (currentView === 'all') renderView('all');
+    input.focus();
+  });
+}
+
+function updateSearchCount(shown, total) {
+  const el = document.getElementById('feedSearchCount');
+  if (!_searchQuery) { el.textContent = ''; return; }
+  el.textContent = `${shown} of ${total} quote${total !== 1 ? 's' : ''} match`;
+}
+
+/* Simple highlight — wraps matched text in <mark> */
+function highlight(text, query) {
+  if (!query || !text) return escHtml(text);
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`(${escaped})`, 'gi');
+  return escHtml(text).replace(re, '<mark>$1</mark>');
 }
 
 /* ══════════════════════════════════════════════
@@ -1304,14 +1538,11 @@ async function fetchQuotes() {
 
     const promises = mdFiles.map(async f => {
       const raw = await fetch(f.download_url).then(r => r.text());
-      const q   = parseMarkdown(raw, f.name);
-      return q;
+      return parseMarkdown(raw, f.name);
     });
 
     const results = await Promise.all(promises);
     allQuotes = results.filter(Boolean);
-
-    // Sort newest first
     allQuotes.sort((a, b) => b.date - a.date);
 
     document.getElementById('mastCount').textContent = `${allQuotes.length} quotes`;
@@ -1334,7 +1565,6 @@ function parseMarkdown(md, filename) {
     if (k && v.length) data[k.trim()] = v.join(':').trim();
   });
 
-  // Extract date from filename: YYYY-MM-DD_...
   const dateMatch = filename.match(/^(\d{4}-\d{2}-\d{2})/);
   const dateStr   = dateMatch ? dateMatch[1] : null;
   const date      = dateStr ? new Date(dateStr + 'T00:00:00') : new Date(0);
@@ -1351,11 +1581,22 @@ function parseMarkdown(md, filename) {
   };
 }
 
-/* ══════════════════════════════════════════════
-   NAV QUICK-TABS + DIRECTORY PANEL
-   ══════════════════════════════════════════════ */
+/* Filter quotes by search query */
+function filterBySearch(quotes) {
+  if (!_searchQuery) return quotes;
+  const q = _searchQuery.toLowerCase();
+  return quotes.filter(item =>
+    (item.quote       && item.quote.toLowerCase().includes(q)) ||
+    (item.author      && item.author.toLowerCase().includes(q)) ||
+    (item.contributor && item.contributor.toLowerCase().includes(q)) ||
+    (item.department  && item.department.toLowerCase().includes(q)) ||
+    (item.about       && item.about.toLowerCase().includes(q))
+  );
+}
 
-// Directory state
+/* ══════════════════════════════════════════════
+   NAV QUICK-TABS + DIRECTORY
+   ══════════════════════════════════════════════ */
 let _dirTab      = 'authors';
 let _dirExpanded = null;
 let _dirIndex    = { authors: {}, contributors: {}, departments: {} };
@@ -1367,7 +1608,6 @@ function buildDirectoryIndex() {
     (_dirIndex.contributors[q.contributor] = _dirIndex.contributors[q.contributor] || []).push(i);
     (_dirIndex.departments[q.department]   = _dirIndex.departments[q.department]   || []).push(i);
   });
-  // Update count badges on tabs
   updateQuickTabCounts();
 }
 
@@ -1392,7 +1632,6 @@ function updateQuickTabCounts() {
 }
 
 function setupNav() {
-  // Quick-tab click handler
   document.querySelectorAll('.quick-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab;
@@ -1400,11 +1639,12 @@ function setupNav() {
       btn.classList.add('active');
 
       if (tab === 'all') {
-        // Render the full newspaper feed
         currentView = 'all';
         renderView('all');
+        document.getElementById('feedSearchWrap').style.display = '';
       } else {
-        // Open directory panel filtered to this tab
+        // Hide feed search when in a directory view
+        document.getElementById('feedSearchWrap').style.display = 'none';
         _dirTab      = tab;
         _dirExpanded = null;
         document.getElementById('dirTitle').textContent =
@@ -1416,7 +1656,6 @@ function setupNav() {
     });
   });
 
-  // Directory close / backdrop
   document.getElementById('dirClose').addEventListener('click', closeDir);
   document.getElementById('dirBackdrop').addEventListener('click', closeDir);
   document.getElementById('dirSearch').addEventListener('input', () => {
@@ -1441,10 +1680,7 @@ function renderDirList() {
   container.innerHTML = '';
   const map   = _dirIndex[_dirTab];
   const query = document.getElementById('dirSearch').value.trim().toLowerCase();
-let names = Object.keys(map).sort((a, b) => {
-  return map[b].length - map[a].length || a.localeCompare(b);
-});
-  
+  let names   = Object.keys(map).sort((a, b) => map[b].length - map[a].length || a.localeCompare(b));
   if (query) names = names.filter(n => n.toLowerCase().includes(query));
 
   if (!names.length) {
@@ -1483,15 +1719,14 @@ let names = Object.keys(map).sort((a, b) => {
       const card = document.createElement('div');
       card.className = 'dir-quote';
       let meta = '';
-      if (_dirTab === 'authors')       meta = `Contributed by ${q.contributor}`;
+      if (_dirTab === 'authors')           meta = `Contributed by ${q.contributor}`;
       else if (_dirTab === 'contributors') meta = `— ${q.author}`;
-      else                              meta = `${q.contributor} · ${q.author}`;
+      else                                 meta = `${q.contributor} · ${q.author}`;
       card.innerHTML = `
         <div class="dir-quote-text">"${escHtml(q.quote)}"</div>
         <div class="dir-quote-meta">${escHtml(meta)}</div>`;
       card.addEventListener('click', e => {
         e.stopPropagation();
-        // Open deck starting at this quote, showing all quotes in this group
         _lastRenderedQuotes = indices.map(i => allQuotes[i]);
         openModal(q);
         closeDir();
@@ -1517,163 +1752,103 @@ function renderView(view) {
     return;
   }
 
-  if (view === 'all')         renderAll(main);
-  else if (view === 'today')  renderToday(main);
-  else if (view === 'authors')      renderGrouped(main, 'author');
-  else if (view === 'departments')  renderGrouped(main, 'department');
+  if (view === 'all') renderAll(main);
 }
 
-/* ─── ALL: chronological newspaper ─── */
 function renderAll(container) {
-  const todayStr = todayDateStr();
-  const todayQs  = allQuotes.filter(q => q.dateStr === todayStr);
-  const pastQs   = allQuotes.filter(q => q.dateStr !== todayStr);
-  _lastRenderedQuotes = allQuotes;
+  const todayStr   = todayDateStr();
+  const allFiltered = filterBySearch(allQuotes);
+  const todayQs    = allFiltered.filter(q => q.dateStr === todayStr);
+  const pastQs     = allFiltered.filter(q => q.dateStr !== todayStr);
+  _lastRenderedQuotes = allFiltered;
 
-  // TODAY SECTION
+  updateSearchCount(allFiltered.length, allQuotes.length);
+
+  // No results from search
+  if (_searchQuery && !allFiltered.length) {
+    const div = document.createElement('div');
+    div.className = 'search-no-results';
+    div.innerHTML = `<strong>❦</strong>No quotes matched "<em>${escHtml(_searchQuery)}</em>"`;
+    container.appendChild(div);
+    return;
+  }
+
   if (todayQs.length) {
-    const todayBanner = el('div', 'today-banner', '★  Today\'s Edition  ★');
-    container.appendChild(todayBanner);
+    container.appendChild(el('div', 'today-banner', '★  Today\'s Edition  ★'));
     renderTodaySection(container, todayQs);
   }
 
-  // PAST: group by date
   if (pastQs.length) {
-    // Section header
-    const sectionLabel = makeSectionLabel('Past Contributions', 'Archive');
-    container.appendChild(sectionLabel);
-
+    container.appendChild(makeSectionLabel('Past Contributions', 'Archive'));
     const byDate = groupByDate(pastQs);
-
     byDate.forEach(({ dateStr, quotes }) => {
       const group = el('div', 'date-group');
-
-      // Date header
-      const dateHeader = makeArchiveDateHeader(dateStr, quotes.length);
-      group.appendChild(dateHeader);
-
-      // Grid of quotes
+      group.appendChild(makeArchiveDateHeader(dateStr, quotes.length));
       const cols = Math.min(quotes.length, 3);
       const grid = el('div', `col-grid cols-${cols}`);
-
       quotes.forEach((q, i) => {
         const card = makeQCard(q, i);
-        grid.appendChild(card);
         card.style.animationDelay = `${i * 60}ms`;
+        grid.appendChild(card);
       });
-
       group.appendChild(grid);
       container.appendChild(group);
     });
   }
 
-  if (!todayQs.length && !pastQs.length) {
+  if (!todayQs.length && !pastQs.length && !_searchQuery) {
     container.innerHTML = '<div class="empty-state">No quotes in the archive yet.</div>';
   }
 }
 
-/* ─── TODAY ONLY ─── */
-function renderToday(container) {
-  const todayStr = todayDateStr();
-  const todayQs  = allQuotes.filter(q => q.dateStr === todayStr);
-  _lastRenderedQuotes = todayQs;
-
-  if (!todayQs.length) {
-    container.innerHTML = `<div class="empty-state">No quotes submitted today yet.<br><br><a href="https://andrewveda.github.io/a-quote-a-day/submissions" style="color:var(--ink);font-style:normal;font-family:var(--sans);font-size:12px;letter-spacing:2px;">✏️ Be the first — Add yours</a></div>`;
-    return;
-  }
-
-  const banner = el('div', 'today-banner', `★  Today's Edition  —  ${todayQs.length} contribution${todayQs.length !== 1 ? 's' : ''}  ★`);
-  container.appendChild(banner);
-  renderTodaySection(container, todayQs);
-}
-
 function renderTodaySection(container, qs) {
-  // Hero: first quote
-  const hero = makeTodayHero(qs[0], 0);
+  const hero = makeTodayHero(qs[0]);
   container.appendChild(hero);
-
-  // Rest in columns
   if (qs.length > 1) {
     const rest = qs.slice(1);
     const cols = Math.min(rest.length, 3);
     const grid = el('div', `col-grid cols-${cols}`);
     rest.forEach((q, i) => {
-      // Alternate between full card and pull-quote style
       const card = (i % 3 === 1 && rest.length > 2) ? makePullQuote(q, i + 1) : makeQCard(q, i + 1);
-      grid.appendChild(card);
       card.style.animationDelay = `${(i + 1) * 80}ms`;
+      grid.appendChild(card);
     });
     container.appendChild(grid);
   }
 }
 
-/* ─── GROUPED (author / department) ─── */
-function renderGrouped(container, field) {
-  const label = field === 'author' ? 'By Author' : 'By Department';
-  container.appendChild(makeSectionLabel(label, `${allQuotes.length} quotes`));
-  _lastRenderedQuotes = allQuotes;
-
-  const groups = {};
-  allQuotes.forEach(q => {
-    const key = q[field] || 'Unknown';
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(q);   // original reference, not a copy
-  });
-
-  const sortedKeys = Object.keys(groups).sort((a, b) => {
-    // Sort by count desc, then alpha
-    return groups[b].length - groups[a].length || a.localeCompare(b);
-  });
-
-  sortedKeys.forEach(key => {
-    const qs = groups[key];
-    const dateHeader = makeArchiveDateHeader(key, qs.length, true);
-    container.appendChild(dateHeader);
-
-    const cols = Math.min(qs.length, 3);
-    const grid = el('div', `col-grid cols-${cols}`);
-    qs.forEach((q, i) => {
-      const card = makeQCard(q, i);
-      grid.appendChild(card);
-      card.style.animationDelay = `${i * 60}ms`;
-    });
-    container.appendChild(grid);
-  });
-}
-
 /* ══════════════════════════════════════════════
    BUILDERS
    ══════════════════════════════════════════════ */
-
-function makeTodayHero(q, idx) {
+function makeTodayHero(q) {
   const div = document.createElement('div');
   div.className = 'today-hero';
+  const sq = _searchQuery;
   div.innerHTML = `
     <div class="hero-kicker">✦ Featured Quote of the Day</div>
-    <div class="hero-quote-text">"${escHtml(q.quote)}"</div>
-    <div class="hero-byline">— <strong>${escHtml(q.author)}</strong></div>
-    <div class="hero-student-name">${escHtml(q.contributor)}</div>
-    <div class="hero-student-dept">${escHtml(q.department || '')}</div>
-    ${q.about ? `<div class="hero-about">${escHtml(q.about)}</div>` : ''}
+    <div class="hero-quote-text">"${highlight(q.quote, sq)}"</div>
+    <div class="hero-byline">— <strong>${highlight(q.author, sq)}</strong></div>
+    <div class="hero-student-name">${highlight(q.contributor, sq)}</div>
+    <div class="hero-student-dept">${highlight(q.department || '', sq)}</div>
+    ${q.about ? `<div class="hero-about">${highlight(q.about, sq)}</div>` : ''}
   `;
-  div.addEventListener('click', () => openModal(q, 1));
-  div.style.cursor = 'pointer';
+  div.addEventListener('click', () => openModal(q));
   return div;
 }
 
 function makeQCard(q, displayIdx) {
   const div = document.createElement('div');
   div.className = 'q-card';
+  const sq = _searchQuery;
   div.innerHTML = `
     <div class="q-card-num">No. ${displayIdx + 1}</div>
-    <div class="q-card-text">"${escHtml(q.quote)}"</div>
+    <div class="q-card-text">"${highlight(q.quote, sq)}"</div>
     <div class="q-card-rule"></div>
-    <div class="q-card-author">— ${escHtml(q.author)}</div>
-    <div class="q-card-student-name">${escHtml(q.contributor)}</div>
-    <div class="q-card-student-dept">${escHtml(q.department || '')}</div>
-    <div class="q-card-meta">${q.dateStr !== 'Unknown' ? formatDateFull(q.dateStr) : ''}</div>
-    ${q.about ? `<div class="q-card-about">${escHtml(q.about)}</div>` : ''}
+    <div class="q-card-author">— ${highlight(q.author, sq)}</div>
+    <div class="q-card-student-name">${highlight(q.contributor, sq)}</div>
+    <div class="q-card-student-dept">${highlight(q.department || '', sq)}</div>
+    <div class="q-card-meta">${q.dateStr !== 'Unknown' ? escHtml(formatDateFull(q.dateStr)) : ''}</div>
+    ${q.about ? `<div class="q-card-about">${highlight(q.about, sq)}</div>` : ''}
   `;
   div.addEventListener('click', () => openModal(q, displayIdx + 1));
   return div;
@@ -1683,7 +1858,7 @@ function makePullQuote(q, displayIdx) {
   const div = document.createElement('div');
   div.className = 'pull-quote';
   div.innerHTML = `
-    <div class="pull-quote-text">"${escHtml(q.quote)}"</div>
+    <div class="pull-quote-text">"${highlight(q.quote, _searchQuery)}"</div>
     <div class="pull-quote-attr">— ${escHtml(q.author)}</div>
   `;
   div.addEventListener('click', () => openModal(q, displayIdx + 1));
@@ -1696,25 +1871,19 @@ function makeSectionLabel(title, sub) {
   wrap.innerHTML = `
     <div class="section-label-text">${escHtml(title)}</div>
     <div class="section-label-rule"></div>
-    <div class="section-label-date">${escHtml(sub)}</div>
-  `;
+    <div class="section-label-date">${escHtml(sub)}</div>`;
   return wrap;
 }
 
 function makeArchiveDateHeader(dateStrOrLabel, count, isLabel = false) {
   const wrap = document.createElement('div');
   wrap.className = 'archive-date-header';
-
   let calHTML;
   if (isLabel) {
     const initials = dateStrOrLabel.split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase();
-    calHTML = `
-      <div class="archive-date-cal">
-        <div class="archive-date-cal-month" style="font-size:16px;opacity:1;">${escHtml(initials)}</div>
-      </div>
-    `;
+    calHTML = `<div class="archive-date-cal"><div class="archive-date-cal-month" style="font-size:16px;opacity:1;">${escHtml(initials)}</div></div>`;
   } else {
-    const d = new Date(dateStrOrLabel + 'T00:00:00');
+    const d     = new Date(dateStrOrLabel + 'T00:00:00');
     const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
     const day   = d.getDate();
     const year  = d.getFullYear();
@@ -1723,37 +1892,27 @@ function makeArchiveDateHeader(dateStrOrLabel, count, isLabel = false) {
         <div class="archive-date-cal-month">${month}</div>
         <div class="archive-date-cal-day">${day}</div>
         <div class="archive-date-cal-year">${year}</div>
-      </div>
-    `;
+      </div>`;
   }
-
   const fullLabel = isLabel ? dateStrOrLabel : formatDateFull(dateStrOrLabel);
-  const subLabel  = `${count} contribution${count !== 1 ? 's' : ''}`;
-
   wrap.innerHTML = `
     ${calHTML}
     <div class="archive-date-info">
       <div class="archive-date-label">${escHtml(fullLabel)}</div>
-      <div class="archive-date-sub">${subLabel}</div>
-    </div>
-  `;
+      <div class="archive-date-sub">${count} contribution${count !== 1 ? 's' : ''}</div>
+    </div>`;
   return wrap;
 }
 
-/* openModal is defined later in the share section */
-
-
 /* ══════════════════════════════════════════════
-   DECK VIEWER ENGINE
+   DECK VIEWER
    ══════════════════════════════════════════════ */
-let _deckQuotes  = [];
-let _deckIdx     = 0;
-let _currentShareQuote = null;
+let _deckQuotes         = [];
+let _deckIdx            = 0;
+let _currentShareQuote  = null;
 
 function openModal(q) {
-  // Use the current view's quote list; fall back to allQuotes
   const pool = _lastRenderedQuotes.length ? _lastRenderedQuotes : allQuotes;
-  // Find by reference first, then by quote text as fallback
   let idx = pool.indexOf(q);
   if (idx === -1) idx = pool.findIndex(p => p.quote === q.quote && p.contributor === q.contributor);
   if (idx === -1) idx = 0;
@@ -1762,23 +1921,24 @@ function openModal(q) {
 
 function openDeck(quotes, startIdx) {
   _deckQuotes = quotes;
-
-  // Build slides
   const track = document.getElementById('deckTrack');
   track.innerHTML = '';
   track.style.transition = 'none';
   track.style.transform  = 'translateX(0)';
 
   quotes.forEach((q, i) => {
-    const slide = document.createElement('div');
-    slide.className = 'deck-slide';
+    const slide      = document.createElement('div');
+    slide.className  = 'deck-slide';
+    const globalNum  = allQuotes.findIndex(p => p.quote === q.quote && p.contributor === q.contributor) + 1;
+    const hasAbout   = !!q.about;
+    const term       = giscusTerm(q); // unique giscus term = quote text (≤80 chars)
 
-    const globalNum = allQuotes.findIndex(p => p.quote === q.quote && p.contributor === q.contributor) + 1;
-    const hasAbout  = !!q.about;
+    // Giscus discussion URL uses the truncated quote text as search term
+    const discussURL = `https://github.com/AndrewVeda/a-quote-a-day/discussions?discussions_q=${encodeURIComponent(term)}`;
 
     slide.innerHTML = `
       <div class="deck-card">
-        <div class="dc-kicker">Quote #${globalNum} · ${formatDateFull(q.dateStr)}</div>
+        <div class="dc-kicker">Quote #${globalNum} · ${escHtml(formatDateFull(q.dateStr))}</div>
         <div class="dc-quote">"${escHtml(q.quote)}"</div>
         <div class="dc-author-name">${escHtml(q.author)}</div>
         <div class="dc-author-role">Quoted Author</div>
@@ -1789,49 +1949,44 @@ function openDeck(quotes, startIdx) {
           ${hasAbout ? `
             <div class="dc-contrib-divider"></div>
             <div class="dc-about-label">What this means to me</div>
-            <div class="dc-about-text">${escHtml(q.about)}</div>
-          ` : ''}
+            <div class="dc-about-text">${escHtml(q.about)}</div>` : ''}
         </div>
         <div class="dc-actions">
-          <a class="dc-btn primary dc-btn-discuss" href="https://github.com/AndrewVeda/a-quote-a-day/discussions?discussions_q=Quote+%23${globalNum}" target="_blank" rel="noopener">💬 Discuss</a>
+          <a class="dc-btn primary" href="${discussURL}" target="_blank" rel="noopener">💬 Discuss</a>
           <button class="dc-btn dc-btn-wa">📲 WhatsApp</button>
           <button class="dc-btn dc-btn-img">📸 Share</button>
           <a class="dc-btn" href="https://andrewveda.github.io/a-quote-a-day/submissions" target="_blank">✏️ Add a Quote</a>
         </div>
-<div class="dc-giscus-wrap">
-  <div class="giscus-mount"></div> <!-- Changed from class="giscus" -->
-</div>
-</div>
+        <div class="dc-giscus-wrap">
+          <div class="giscus-mount" data-term="${escHtml(term)}"></div>
+        </div>
       </div>`;
-
+    track.appendChild(slide);
   });
 
+  // Dots
   const dotsWrap = document.getElementById('deckDots');
   dotsWrap.innerHTML = '';
   if (quotes.length > 1) {
     quotes.forEach((_, i) => {
-      const d = document.createElement('div');
+      const d   = document.createElement('div');
       d.className = 'deck-dot';
       d.addEventListener('click', () => deckGoTo(i));
       dotsWrap.appendChild(d);
     });
   }
 
-  // Show overlay before jumping so layout is painted
   document.getElementById('deckOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 
-  // Jump after a frame so track width is known
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      deckGoTo(startIdx, false);
-    });
+    requestAnimationFrame(() => { deckGoTo(startIdx, false); });
   });
 }
 
 function deckGoTo(i, animate = true) {
-  const track = document.getElementById('deckTrack');
-  _deckIdx = Math.max(0, Math.min(i, _deckQuotes.length - 1));
+  const track  = document.getElementById('deckTrack');
+  _deckIdx     = Math.max(0, Math.min(i, _deckQuotes.length - 1));
   _currentShareQuote = _deckQuotes[_deckIdx];
   loadGiscusForCurrentQuote();
 
@@ -1849,10 +2004,9 @@ function closeDeck() {
   document.body.style.overflow = '';
 }
 
-// Controls
 document.getElementById('deckClose').addEventListener('click', closeDeck);
-document.getElementById('deckPrev').addEventListener('click', () => deckGoTo(_deckIdx - 1));
-document.getElementById('deckNext').addEventListener('click', () => deckGoTo(_deckIdx + 1));
+document.getElementById('deckPrev').addEventListener('click',  () => deckGoTo(_deckIdx - 1));
+document.getElementById('deckNext').addEventListener('click',  () => deckGoTo(_deckIdx + 1));
 
 document.addEventListener('keydown', e => {
   if (!document.getElementById('deckOverlay').classList.contains('open')) return;
@@ -1865,77 +2019,60 @@ document.addEventListener('keydown', e => {
 (function () {
   const overlay = document.getElementById('deckOverlay');
   let sx = 0, sy = 0, dragging = false;
-
-  overlay.addEventListener('touchstart', e => {
-    sx = e.touches[0].clientX;
-    sy = e.touches[0].clientY;
-    dragging = false;
-  }, { passive: true });
-
-  overlay.addEventListener('touchmove', e => {
-    dragging = true;
-  }, { passive: true });
-
-  overlay.addEventListener('touchend', e => {
+  overlay.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; dragging = false; }, { passive: true });
+  overlay.addEventListener('touchmove',  () => { dragging = true; }, { passive: true });
+  overlay.addEventListener('touchend',   e => {
     if (!dragging) return;
     const dx = e.changedTouches[0].clientX - sx;
     const dy = e.changedTouches[0].clientY - sy;
     if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
-    if (dx < 0) deckGoTo(_deckIdx + 1);
-    else         deckGoTo(_deckIdx - 1);
+    if (dx < 0) deckGoTo(_deckIdx + 1); else deckGoTo(_deckIdx - 1);
   }, { passive: true });
 })();
 
+/* ══════════════════════════════════════════════
+   GISCUS — unique term = quote text (≤80 chars)
+   ══════════════════════════════════════════════ */
 function loadGiscusForCurrentQuote() {
-  // 1. Clear out inactive Giscus iframes to save memory and prevent DOM conflicts
+  // Clear all mounts
   document.querySelectorAll('.giscus-mount').forEach(el => {
     el.innerHTML = '';
-    el.classList.remove('giscus'); 
+    el.classList.remove('giscus');
   });
 
-  // 2. Locate the active slide and its mount point
   const slide = document.querySelectorAll('.deck-slide')[_deckIdx];
   if (!slide) return;
-
   const container = slide.querySelector('.giscus-mount');
   if (!container) return;
 
-  // 3. Add the 'giscus' class ONLY to the active container so client.js finds it
   container.classList.add('giscus');
+  const term = container.dataset.term || giscusTerm(_deckQuotes[_deckIdx]);
 
-  // 4. Calculate the global quote number
-  const globalNum = allQuotes.findIndex(p => 
-    p.quote === _deckQuotes[_deckIdx].quote && 
-    p.contributor === _deckQuotes[_deckIdx].contributor
-  ) + 1;
-
-  // 5. Inject the script
   const script = document.createElement('script');
-  script.src = 'https://giscus.app/client.js';
-  script.async = true;
-  script.crossOrigin = 'anonymous';
-
-  script.setAttribute('data-repo', 'andrewveda/a-quote-a-day');
-  script.setAttribute('data-repo-id', 'R_kgDORI8-yw');
-  script.setAttribute('data-category', 'General');
-  script.setAttribute('data-category-id', 'DIC_kwDORI8-y84C1-Jq');
-  script.setAttribute('data-mapping', 'specific');
-  script.setAttribute('data-term', `Quote #${globalNum}`);
-  script.setAttribute('data-strict', '1');
+  script.src          = 'https://giscus.app/client.js';
+  script.async        = true;
+  script.crossOrigin  = 'anonymous';
+  script.setAttribute('data-repo',              'andrewveda/a-quote-a-day');
+  script.setAttribute('data-repo-id',           'R_kgDORI8-yw');
+  script.setAttribute('data-category',          'General');
+  script.setAttribute('data-category-id',       'DIC_kwDORI8-y84C1-Jq');
+  script.setAttribute('data-mapping',           'specific');
+  script.setAttribute('data-term',              term);          // ← unique per quote
+  script.setAttribute('data-strict',            '1');
   script.setAttribute('data-reactions-enabled', '1');
-  script.setAttribute('data-emit-metadata', '0');
-  script.setAttribute('data-input-position', 'top');
-  script.setAttribute('data-theme', 'preferred_color_scheme');
-  script.setAttribute('data-lang', 'en');
-
+  script.setAttribute('data-emit-metadata',     '0');
+  script.setAttribute('data-input-position',    'top');
+  script.setAttribute('data-theme',             'preferred_color_scheme');
+  script.setAttribute('data-lang',              'en');
   container.appendChild(script);
 }
+
+/* ══════════════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════════════ */
 function todayDateStr() {
   const now = new Date();
-  const y   = now.getFullYear();
-  const m   = String(now.getMonth() + 1).padStart(2, '0');
-  const d   = String(now.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 }
 
 function formatDateFull(dateStr) {
@@ -1951,10 +2088,7 @@ function groupByDate(quotes) {
     if (!map[key]) map[key] = [];
     map[key].push(q);
   });
-  // Sort dates descending
-  return Object.keys(map)
-    .sort((a, b) => b.localeCompare(a))
-    .map(dateStr => ({ dateStr, quotes: map[dateStr] }));
+  return Object.keys(map).sort((a, b) => b.localeCompare(a)).map(dateStr => ({ dateStr, quotes: map[dateStr] }));
 }
 
 function el(tag, className, text = '') {
@@ -1966,25 +2100,18 @@ function el(tag, className, text = '') {
 
 function escHtml(s) {
   if (!s) return '';
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 /* ══════════════════════════════════════════════
-   SHARE AS IMAGE / WHATSAPP
+   SHARE — WhatsApp / Image
    ══════════════════════════════════════════════ */
-// _currentShareQuote is set by the deck engine whenever a slide is active
-
 function populateShareCard(q) {
-  document.getElementById('sc-quote').textContent  = `"${q.quote}"`;
-  document.getElementById('sc-author').textContent = q.author;
-  document.getElementById('sc-date').textContent   = formatDateFull(q.dateStr);
+  document.getElementById('sc-quote').textContent   = `"${q.quote}"`;
+  document.getElementById('sc-author').textContent  = q.author;
+  document.getElementById('sc-date').textContent    = formatDateFull(q.dateStr);
   document.getElementById('sc-contrib').textContent = q.contributor;
-  document.getElementById('sc-dept').textContent   = q.department || '';
-
+  document.getElementById('sc-dept').textContent    = q.department || '';
   const aboutWrap = document.getElementById('sc-about-wrap');
   if (q.about) {
     document.getElementById('sc-about').textContent = q.about;
@@ -1997,28 +2124,18 @@ function populateShareCard(q) {
 async function generateImage() {
   const q = _currentShareQuote;
   if (!q) return null;
-
   populateShareCard(q);
   const node = document.getElementById('shareCard');
-
   await new Promise(r => requestAnimationFrame(r));
   await new Promise(r => setTimeout(r, 100));
-
   const canvas = await html2canvas(node, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: '#ffffff',
-    logging: false,
-    width: 540,
-    height: 960,
+    scale: 2, useCORS: true, backgroundColor: '#ffffff',
+    logging: false, width: 540, height: 960,
   });
-
-  // JPEG at 88% quality — good balance of quality vs file size for WhatsApp
   return new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.88));
 }
 
 async function shareAsImage() {
-  // Update the active slide's share button for feedback
   const activeSlide = document.querySelector('.deck-slide:nth-child(' + (_deckIdx + 1) + ')');
   const btn = activeSlide ? activeSlide.querySelector('.dc-btn-img') : null;
   if (btn) btn.textContent = '⏳…';
@@ -2054,8 +2171,7 @@ async function shareToWhatsApp() {
     const file = new File([blob], 'a-quote-a-day.jpg', { type: 'image/jpeg' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
-        files: [file],
-        title: 'A Quote A Day',
+        files: [file], title: 'A Quote A Day',
         text: `"${q.quote}"\n— ${q.author}\n\nContributed by ${q.contributor}\n\n✨ A Quote A Day · SRM VEC\nhttps://andrewveda.github.io/SRM-VEC-English-PWA`,
       });
       return;
@@ -2074,66 +2190,32 @@ async function shareToWhatsApp() {
     }
   }
 }
+
+/* Delegate share button clicks inside deck slides */
+document.getElementById('deckTrack').addEventListener('click', e => {
+  if (e.target.classList.contains('dc-btn-img')) shareAsImage();
+  if (e.target.classList.contains('dc-btn-wa'))  shareToWhatsApp();
+});
 </script>
 
-<!-- ─── SHARE CARD — 9:16 portrait, mobile-optimised ─── -->
+<!-- ─── SHARE CARD (off-screen) ─── -->
 <div id="shareCard" style="
-  position: fixed;
-  left: -9999px;
-  top: 0;
-  width: 540px;
-  height: 960px;
+  position: fixed; left: -9999px; top: 0;
+  width: 540px; height: 960px;
   background: #ffffff;
   font-family: 'Raleway', sans-serif;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-">
-  <!-- Gold top bar -->
+  overflow: hidden; display: flex; flex-direction: column;">
   <div style="height:8px;background:linear-gradient(90deg,#c9a84c,#e8c97a);flex-shrink:0;"></div>
-
-  <!-- Header -->
   <div style="padding:20px 32px 16px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;justify-content:space-between;align-items:center;">
     <div style="font-family:'IM Fell English',serif;font-style:italic;font-size:28px;color:#2a2a2a;">A Quote A Day</div>
     <div id="sc-date" style="font-family:'DM Mono',monospace;font-size:9px;color:#b0a99f;letter-spacing:1.5px;text-transform:uppercase;text-align:right;max-width:160px;line-height:1.4;"></div>
   </div>
-
-  <!-- Quote block — dominant -->
   <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:28px 32px 20px;position:relative;">
-
-    <!-- Faint decorative quote mark -->
-    <div style="font-family:'Playfair Display',serif;font-size:220px;line-height:0.75;color:#c9a84c;opacity:0.06;position:absolute;top:10px;left:20px;user-select:none;pointer-events:none;">"</div>
-
-    <!-- Kicker -->
+    <div style="font-family:'Playfair Display',serif;font-size:220px;line-height:0.75;color:#c9a84c;opacity:0.06;position:absolute;top:10px;left:20px;user-select:none;">"</div>
     <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#7A0019;margin-bottom:16px;">✦ Student Contribution</div>
-
-    <!-- Quote — very large -->
-    <div id="sc-quote" style="
-      font-family:'Playfair Display',serif;
-      font-size:30px;
-      font-style:italic;
-      font-weight:400;
-      line-height:1.5;
-      color:#2a2a2a;
-      border-left:5px solid #c9a84c;
-      padding-left:20px;
-      margin-bottom:28px;
-      position:relative;
-      z-index:1;
-    "></div>
-
-    <!-- Author -->
-    <div id="sc-author" style="
-      font-family:'Playfair Display',serif;
-      font-size:34px;
-      font-weight:900;
-      color:#2a2a2a;
-      line-height:1.05;
-      margin-bottom:2px;
-    "></div>
+    <div id="sc-quote" style="font-family:'Playfair Display',serif;font-size:30px;font-style:italic;font-weight:400;line-height:1.5;color:#2a2a2a;border-left:5px solid #c9a84c;padding-left:20px;margin-bottom:28px;position:relative;z-index:1;"></div>
+    <div id="sc-author" style="font-family:'Playfair Display',serif;font-size:34px;font-weight:900;color:#2a2a2a;line-height:1.05;margin-bottom:2px;"></div>
     <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#b0a99f;margin-bottom:24px;">Quoted Author</div>
-
-    <!-- Contributor box -->
     <div style="background:linear-gradient(135deg,rgba(201,168,76,0.12),rgba(201,168,76,0.04));border:1px solid rgba(201,168,76,0.35);border-left:5px solid #c9a84c;border-radius:14px;padding:20px 22px;">
       <div style="font-family:'DM Mono',monospace;font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#c9a84c;margin-bottom:7px;">Contributed by</div>
       <div id="sc-contrib" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:#2a2a2a;line-height:1.1;"></div>
@@ -2145,14 +2227,10 @@ async function shareToWhatsApp() {
       </div>
     </div>
   </div>
-
-  <!-- Footer -->
   <div style="flex-shrink:0;border-top:1px solid rgba(0,0,0,0.06);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;">
     <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#b0a99f;">SRM VEC · English Dept</div>
     <div style="font-family:'DM Mono',monospace;font-size:8px;color:#c9a84c;letter-spacing:0.5px;">andrewveda.github.io</div>
   </div>
-
-  <!-- Gold bottom bar -->
   <div style="height:6px;background:linear-gradient(90deg,#c9a84c,#e8c97a);flex-shrink:0;"></div>
 </div>
 
