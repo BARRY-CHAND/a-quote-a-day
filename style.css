@@ -47,23 +47,7 @@
     --spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --paper:        #100f0c;
-        --paper-warm:   #161410;
-        --ink:          #e8e0d0;
-        --ink-mid:      #a09880;
-        --ink-muted:    #685f52;
-        --ink-ghost:    #3a3530;
-        --gold:         #c9a84c;
-        --gold-light:   #e8c97a;
-        --gold-pale:    rgba(201,168,76,0.10);
-        --gold-border:  rgba(201,168,76,0.22);
-        --surface:      #1a1815;
-        --surface-alt:  #141210;
-        --crimson:      #c0373f;
-    }
-}
+
 
 /* ─── 1. GLOBAL ─── */
 html { scroll-behavior: smooth; }
@@ -93,11 +77,7 @@ body {
     transition: box-shadow 0.3s var(--ease);
 }
 
-@media (prefers-color-scheme: dark) {
-    .masthead {
-        background: rgba(16, 15, 12, 0.92);
-    }
-}
+
 
 .masthead.scrolled {
     box-shadow: var(--sh-sm);
