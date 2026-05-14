@@ -1,65 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> 
+<head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>A Quote A Day</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=UnifrakturMaguntia&family=IM+Fell+English:ital@0;1&family=Raleway:wght@300;400;600;700&family=DM+Mono:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" crossorigin="anonymous"/>
+<title>A Quote A Day | SRM VEC</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=UnifrakturMaguntia&family=IM+Fell+English:ital@0;1&family=Raleway:wght@300;400;600;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
 <style>
-/* ─── VARIABLES & THEME ─── */
+/* ─── SYSTEM CORE ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 :root {
-  --obsidian: #ffffff; --deep: #faf7f2; --surface: #ffffff; --surface2: #f5efe6;
+  --obsidian: #1a1a1a; --deep: #faf7f2; --surface: #ffffff; --surface2: #f5efe6;
   --gold: #c9a84c; --gold-light: #e8c97a; --gold-dim: rgba(201,168,76,0.12);
   --gold-border: rgba(201,168,76,0.35); --crimson: #7A0019; --text: #2a2a2a;
   --text-muted: #7a766f; --text-dim: #b0a99f; --border: rgba(0,0,0,0.06);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06); --shadow-gold: 0 8px 24px rgba(201,168,76,0.18);
   --serif: 'Playfair Display', Georgia, serif; --mono: 'DM Mono', monospace;
   --sans: 'Raleway', sans-serif; --fraktur: 'UnifrakturMaguntia', serif;
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06); --shadow-gold: 0 8px 24px rgba(201,168,76,0.18);
-  --header-pad-v: 14px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --deep: #18160f; --surface: #1f1c14; --surface2: #282318;
+    --deep: #12110d; --surface: #1a1813; --surface2: #24211a;
     --text: #e8e0d0; --text-muted: #9a9080; --text-dim: #5a5248;
-    --border: rgba(255,255,255,0.06);
+    --border: rgba(255,255,255,0.07);
   }
 }
 
-body { background: var(--deep); color: var(--text); font-family: var(--sans); min-height: 100vh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+body { background: var(--deep); color: var(--text); font-family: var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; min-height: 100vh; }
 
 /* ─── MASTHEAD ─── */
-.masthead { background: rgba(255,255,255,0.94); backdrop-filter: blur(18px); border-bottom: 1px solid var(--border); text-align: center; padding: var(--header-pad-v) 20px 0; position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow-sm); }
-.masthead-meta { display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
-.masthead-title { font-family: 'IM Fell English', serif; font-style: italic; font-size: clamp(32px, 7vw, 60px); color: var(--text); }
-.nav-bar { display: flex; justify-content: center; gap: 6px; padding: 8px 14px; border-top: 1px solid var(--border); }
-.quick-tab { font-family: var(--sans); font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 6px 14px; cursor: pointer; background: none; border: 1px solid transparent; border-radius: 20px; color: var(--text-muted); transition: 0.2s; }
-.quick-tab.active { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: white; }
+.masthead { background: rgba(var(--surface), 0.94); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); text-align: center; padding: 20px 20px 0; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm); }
+.masthead-meta { display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.masthead-title { font-family: 'IM Fell English', serif; font-style: italic; font-size: clamp(32px, 7vw, 60px); color: var(--text); line-height: 1.2; margin: 10px 0; }
+.nav-bar { display: flex; justify-content: center; gap: 8px; padding: 12px; border-top: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.nav-bar::-webkit-scrollbar { display: none; }
+.quick-tab { font-family: var(--sans); font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 8px 18px; cursor: pointer; background: none; border: 1px solid transparent; border-radius: 25px; color: var(--text-muted); transition: 0.3s cubic-bezier(0.4,0,0.2,1); white-space: nowrap; }
+.quick-tab.active { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: white; box-shadow: 0 4px 12px rgba(201,168,76,0.3); }
 
-/* ─── FEED & CARDS ─── */
-.newspaper-body { max-width: 1200px; margin: 0 auto; padding: 16px; }
-.col-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-.q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; }
-.q-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-gold); border-color: var(--gold-border); }
-.q-card-text { font-family: var(--serif); font-style: italic; font-size: 1.1rem; margin-bottom: 15px; }
+/* ─── GRID & CARDS ─── */
+.newspaper-body { max-width: 1400px; margin: 0 auto; padding: 20px; }
+.col-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; cursor: pointer; transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); display: flex; flex-direction: column; position: relative; }
+.q-card:hover { transform: translateY(-5px); border-color: var(--gold-border); box-shadow: var(--shadow-gold); }
+.q-card-text { font-family: var(--serif); font-style: italic; font-size: 1.25rem; line-height: 1.6; color: var(--text); margin-bottom: 20px; position: relative; }
+.q-card-author { font-family: var(--serif); font-weight: 900; font-size: 1.1rem; color: var(--text); }
+.q-card-contributor { font-family: var(--mono); font-size: 10px; color: var(--gold); text-transform: uppercase; margin-top: 8px; letter-spacing: 1px; }
 
-/* ─── DECK OVERLAY ─── */
-.deck-overlay { position: fixed; inset: 0; background: rgba(20,16,10,0.95); backdrop-filter: blur(10px); z-index: 200; display: none; flex-direction: column; }
-.deck-overlay.open { display: flex; }
-.deck-track { display: flex; height: 100%; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-.deck-slide { flex: 0 0 100vw; width: 100vw; display: flex; justify-content: center; padding: 20px 16px; overflow-y: auto; }
-.deck-card { background: var(--surface); border-radius: 20px; width: 100%; max-width: 560px; padding: 30px; align-self: flex-start; border-top: 4px solid var(--gold); }
-.dc-contrib-box { background: var(--gold-dim); border: 1px solid var(--gold-border); border-left: 4px solid var(--gold); border-radius: 12px; padding: 20px; margin: 20px 0; }
-.dc-btn { padding: 10px 16px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-family: var(--sans); font-size: 11px; font-weight: 700; text-transform: uppercase; transition: 0.2s; }
-.dc-btn.primary { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: white; border: none; }
+/* ─── SWIPE DECK OVERLAY ─── */
+.deck-overlay { position: fixed; inset: 0; background: rgba(10,10,10,0.98); backdrop-filter: blur(15px); z-index: 1000; display: none; flex-direction: column; opacity: 0; transition: opacity 0.4s ease; }
+.deck-overlay.open { display: flex; opacity: 1; }
+.deck-topbar { padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; color: white; }
+.deck-track-wrap { flex: 1; overflow: hidden; position: relative; width: 100vw; }
+.deck-track { display: flex; height: 100%; transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1); will-change: transform; }
+.deck-slide { flex: 0 0 100vw; width: 100vw; display: flex; justify-content: center; padding: 20px 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+/* ─── THE MASTER CARD (Academic Styling) ─── */
+.deck-card { background: var(--surface); border-radius: 24px; width: 100%; max-width: 580px; padding: 40px; align-self: flex-start; border-top: 6px solid var(--gold); box-shadow: 0 30px 60px rgba(0,0,0,0.4); position: relative; }
+.dc-kicker { font-family: var(--mono); font-size: 10px; color: var(--crimson); font-weight: 700; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 25px; }
+.dc-quote { font-family: var(--serif); font-style: italic; font-size: 28px; line-height: 1.45; color: var(--text); border-left: 5px solid var(--gold); padding-left: 25px; margin-bottom: 30px; }
+.dc-author { font-family: var(--serif); font-weight: 900; font-size: 34px; line-height: 1.1; margin-bottom: 5px; }
+.dc-role { font-family: var(--mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 35px; }
+
+.dc-contrib-box { background: var(--gold-dim); border: 1px solid var(--gold-border); border-left: 5px solid var(--gold); border-radius: 16px; padding: 25px; margin-bottom: 35px; }
+.dc-contrib-label { font-family: var(--mono); font-size: 9px; color: var(--gold); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+.dc-contrib-name { font-family: var(--serif); font-weight: 900; font-size: 24px; color: var(--text); }
+.dc-contrib-dept { font-family: var(--mono); font-size: 10px; color: var(--gold); margin-top: 4px; text-transform: uppercase; }
+.dc-reflection { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--gold-border); font-family: var(--sans); font-style: italic; font-size: 15px; line-height: 1.7; color: var(--text-muted); }
 
 /* ─── DIRECTORY PANEL ─── */
-.dir-panel { position: fixed; top: 0; right: 0; width: 400px; max-width: 100vw; height: 100dvh; background: var(--surface); z-index: 300; transform: translateX(100%); transition: 0.4s; display: flex; flex-direction: column; }
+.dir-panel { position: fixed; top: 0; right: 0; width: 420px; max-width: 100vw; height: 100dvh; background: var(--surface); z-index: 2000; transform: translateX(100%); transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -10px 0 40px rgba(0,0,0,0.1); }
 .dir-panel.open { transform: translateX(0); }
-.dir-row { padding: 15px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
-.dir-row:hover { background: var(--gold-dim); }
-.dir-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 250; display: none; }
+.dir-header { padding: 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.dir-row { padding: 20px 30px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+.dir-row:hover { background: var(--gold-dim); padding-left: 40px; }
+.dir-count { font-family: var(--mono); color: var(--gold); font-size: 12px; }
+
+/* ─── ACTION BUTTONS ─── */
+.action-row { display: flex; gap: 12px; margin-top: 20px; }
+.btn-share { flex: 1; padding: 14px; border-radius: 30px; border: none; font-family: var(--sans); font-weight: 700; font-size: 11px; text-transform: uppercase; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-wa { background: #25D366; color: white; }
+.btn-wa:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+/* ─── OFFSCREEN CANVAS (The Secret to the Beautiful Image) ─── */
+#share-canvas-container { position: fixed; left: -9999px; top: 0; }
 </style>
 </head>
 <body>
@@ -67,8 +91,8 @@ body { background: var(--deep); color: var(--text); font-family: var(--sans); mi
 <header class="masthead">
   <div class="masthead-meta">
     <span id="mastDateline">—</span>
-    <span class="masthead-edition">Student Edition</span>
-    <span id="mastCount">0 quotes</span>
+    <span class="masthead-edition">Digital Student Edition</span>
+    <span id="mastCount">0 Quotes</span>
   </div>
   <div class="masthead-title">A Quote A Day</div>
   <nav class="nav-bar">
@@ -76,253 +100,334 @@ body { background: var(--deep); color: var(--text); font-family: var(--sans); mi
     <button class="quick-tab" data-tab="authors">Authors</button>
     <button class="quick-tab" data-tab="contributors">Contributors</button>
     <button class="quick-tab" data-tab="departments">Depts</button>
+    <a href="https://andrewveda.github.io/a-quote-a-day/submissions" class="quick-tab" style="text-decoration:none; color:var(--crimson);">✏️ Add Quote</a>
   </nav>
 </header>
 
 <main class="newspaper-body" id="mainContent">
-  <div class="loading-page" id="loader">
-    <div class="loading-spinner">❦</div>
-    <div class="loading-text">Typesetting Wisdom…</div>
+  <div id="loader" style="text-align:center; padding:100px;">
+    <div style="font-size:40px; animation: pulse 2s infinite;">❦</div>
+    <p style="font-family:var(--mono); font-size:12px; margin-top:20px; color:var(--text-dim); letter-spacing:2px;">TYPESETTING WISDOM...</p>
   </div>
 </main>
 
-<!-- DECK -->
+<!-- THE DECK -->
 <div class="deck-overlay" id="deckOverlay">
-  <div style="padding:15px 25px; display:flex; justify-content:space-between; align-items:center; color:white;">
-    <button id="deckClose" style="background:none; border:none; color:white; font-size:30px; cursor:pointer;">✕</button>
-    <div id="deckCounter" style="font-family:var(--mono); font-size:12px;">1 / 1</div>
+  <div class="deck-topbar">
+    <button id="deckClose" style="background:none; border:none; color:white; font-size:32px; cursor:pointer;">✕</button>
+    <div id="deckCounter" style="font-family:var(--mono); font-size:13px; letter-spacing:2px;">01 / 00</div>
+    <div style="width:32px;"></div>
   </div>
-  <div style="flex:1; overflow:hidden; position:relative;">
+  <div class="deck-track-wrap" id="swipeArea">
     <div class="deck-track" id="deckTrack"></div>
   </div>
 </div>
 
-<!-- DIRECTORY -->
-<div class="dir-backdrop" id="dirBackdrop"></div>
+<!-- THE DIRECTORY -->
+<div id="dirBackdrop" style="position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1500; display:none;"></div>
 <aside class="dir-panel" id="dirPanel">
-  <div style="padding:25px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-    <h2 id="dirTitle" style="font-family:var(--serif);">Directory</h2>
+  <div class="dir-header">
+    <h2 id="dirTitle" style="font-family:var(--serif); font-size:28px;">Authors</h2>
     <button id="dirClose" style="background:none; border:none; font-size:24px; cursor:pointer;">✕</button>
   </div>
   <div id="dirList" style="flex:1; overflow-y:auto;"></div>
 </aside>
 
+<!-- HIDDEN IMAGE GENERATOR STAGE -->
+<div id="share-canvas-container"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
+/* ─── ARCHITECTURE ─── */
 const REPO = "AndrewVeda/a-quote-a-day";
 const QUOTES_DIR = "quotes";
 let allQuotes = [];
-let _deckQuotes = [];
-let _deckIdx = 0;
+let currentDeck = [];
+let deckIndex = 0;
 
-// INIT
+// TOUCH ENGINE STATE
+let startX = 0;
+let currentTranslate = 0;
+let prevTranslate = 0;
+let animationID = 0;
+let isDragging = false;
+
+/* ─── CORE ENGINE ─── */
 document.addEventListener('DOMContentLoaded', async () => {
-    setDateline();
-    await fetchQuotes();
-    setupNav();
-    setupGestures();
+  updateDateline();
+  await loadDatabase();
+  initNavigation();
+  initTouchEngine();
 });
 
-function setDateline() {
-    const now = new Date();
-    document.getElementById('mastDateline').textContent = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase();
+function updateDateline() {
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('mastDateline').innerText = new Date().toLocaleDateString('en-US', options).toUpperCase();
 }
 
-async function fetchQuotes() {
-    try {
-        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${QUOTES_DIR}`);
-        const files = await res.json();
-        const promises = files.filter(f => f.name.endsWith('.md')).map(async f => {
-            const raw = await fetch(f.download_url).then(r => r.text());
-            return parseMD(raw, f.name);
-        });
-        allQuotes = (await Promise.all(promises)).filter(Boolean);
-        allQuotes.sort((a, b) => b.date - a.date);
-        document.getElementById('mastCount').textContent = `${allQuotes.length} quotes`;
-        renderFeed(allQuotes);
-    } catch (e) {
-        console.error(e);
-        document.getElementById('mainContent').innerHTML = `<div style="text-align:center; padding:50px;">API Rate Limit reached. Please try again later.</div>`;
-    } finally {
-        document.getElementById('loader').style.display = 'none';
-    }
-}
-
-function parseMD(md, filename) {
-    const match = md.match(/---([\s\S]*?)---/);
-    if (!match) return null;
-    const data = {};
-    match[1].split('\n').forEach(l => {
-        const i = l.indexOf(':');
-        if (i !== -1) data[l.substring(0, i).trim()] = l.substring(i + 1).trim();
+async function loadDatabase() {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${QUOTES_DIR}`);
+    const files = await res.json();
+    const promises = files.filter(f => f.name.endsWith('.md')).map(async f => {
+      const raw = await fetch(f.download_url).then(r => r.text());
+      return parseMarkdown(raw, f.name);
     });
-    const dateMatch = filename.match(/^(\d{4}-\d{2}-\d{2})/);
-    return { 
-        ...data, 
-        about: data.what_it_means_to_me || data.about || '',
-        date: new Date(dateMatch ? dateMatch[1] : 0),
-        dateStr: dateMatch ? dateMatch[1] : 'Unknown'
-    };
+    allQuotes = (await Promise.all(promises)).filter(Boolean);
+    allQuotes.sort((a, b) => b.date - a.date);
+    document.getElementById('mastCount').innerText = `${allQuotes.length} Quotes`;
+    renderFeed(allQuotes);
+  } catch (err) {
+    document.getElementById('mainContent').innerHTML = `<div style="text-align:center; padding:50px;">Architecture Error: ${err.message}</div>`;
+  } finally {
+    document.getElementById('loader').style.display = 'none';
+  }
 }
 
+function parseMarkdown(md, filename) {
+  const parts = md.split('---');
+  if (parts.length < 3) return null;
+  const data = {};
+  parts[1].split('\n').forEach(line => {
+    const idx = line.indexOf(':');
+    if (idx !== -1) data[line.substring(0, idx).trim()] = line.substring(idx + 1).trim();
+  });
+  const dateMatch = filename.match(/^(\d{4}-\d{2}-\d{2})/);
+  return {
+    quote: data.quote || "Wisdom missing.",
+    author: data.author || "Anonymous",
+    contributor: data.contributor || "Student",
+    department: data.department || "General",
+    about: data.what_it_means_to_me || data.about || "",
+    date: new Date(dateMatch ? dateMatch[1] : 0)
+  };
+}
+
+/* ─── RENDERING ─── */
 function renderFeed(quotes) {
-    const main = document.getElementById('mainContent');
-    main.innerHTML = '<div class="col-grid"></div>';
-    const grid = main.querySelector('.col-grid');
-    quotes.forEach((q, i) => {
-        const card = document.createElement('div');
-        card.className = 'q-card';
-        card.innerHTML = `
-            <div class="q-card-text">"${q.quote}"</div>
-            <div style="font-weight:900;">— ${q.author}</div>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:5px;">${q.contributor} · ${q.department}</div>
-        `;
-        card.onclick = () => openDeck(quotes, i);
-        grid.appendChild(card);
-    });
+  const main = document.getElementById('mainContent');
+  main.innerHTML = '<div class="col-grid"></div>';
+  const grid = main.querySelector('.col-grid');
+  quotes.forEach((q, idx) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.innerHTML = `
+      <div class="q-card-text">"${q.quote}"</div>
+      <div class="q-card-author">— ${q.author}</div>
+      <div class="q-card-contributor">Collected by ${q.contributor}</div>
+    `;
+    card.onclick = () => openDeck(quotes, idx);
+    grid.appendChild(card);
+  });
 }
 
-function openDeck(quotes, startIdx) {
-    _deckQuotes = quotes;
-    const track = document.getElementById('deckTrack');
-    track.innerHTML = '';
-    quotes.forEach((q, i) => {
-        const slide = document.createElement('div');
-        slide.className = 'deck-slide';
-        slide.innerHTML = `
-            <div class="deck-card">
-                <div style="font-family:var(--mono); font-size:10px; color:var(--crimson); margin-bottom:15px; letter-spacing:2px; font-weight:700; text-transform:uppercase;">✦ Student Contribution</div>
-                <div style="font-family:var(--serif); font-style:italic; font-size:24px; line-height:1.4; border-left:4px solid var(--gold); padding-left:20px; margin-bottom:20px;">"${q.quote}"</div>
-                <div style="font-family:var(--serif); font-weight:900; font-size:28px;">${q.author}</div>
-                
-                <div class="dc-contrib-box">
-                    <div style="font-family:var(--mono); font-size:9px; color:var(--gold); font-weight:700; text-transform:uppercase; margin-bottom:5px;">Contributed by</div>
-                    <div style="font-family:var(--serif); font-weight:900; font-size:22px;">${q.contributor}</div>
-                    <div style="font-family:var(--mono); font-size:10px; color:var(--gold); text-transform:uppercase; margin-top:3px; letter-spacing:1px;">${q.department}</div>
-                    
-                    ${q.about ? `
-                        <div style="height:1px; background:var(--gold-border); margin:15px 0;"></div>
-                        <div style="font-family:var(--mono); font-size:9px; color:var(--gold); font-weight:700; text-transform:uppercase; margin-bottom:5px;">What this means to me</div>
-                        <div style="font-family:var(--sans); font-style:italic; font-size:14px; color:var(--text-muted); line-height:1.6;">${q.about}</div>
-                    ` : ''}
-                </div>
+/* ─── SWIPE DECK ENGINE ─── */
+function openDeck(quotes, idx) {
+  currentDeck = quotes;
+  deckIndex = idx;
+  const track = document.getElementById('deckTrack');
+  track.innerHTML = '';
+  
+  quotes.forEach((q, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'deck-slide';
+    slide.innerHTML = `
+      <div class="deck-card" id="card-to-export-${i}">
+        <div class="dc-kicker">Academic Archive</div>
+        <div class="dc-quote">"${q.quote}"</div>
+        <div class="dc-author">${q.author}</div>
+        <div class="dc-role">Source Author</div>
+        
+        <div class="dc-contrib-box">
+          <div class="dc-contrib-label">Curated By</div>
+          <div class="dc-contrib-name">${q.contributor}</div>
+          <div class="dc-contrib-dept">English Department · ${q.department}</div>
+          ${q.about ? `<div class="dc-reflection">"${q.about}"</div>` : ''}
+        </div>
 
-                <div style="display:flex; gap:10px; margin-bottom:30px;">
-                    <button class="dc-btn primary" onclick="shareWA('${q.quote}', '${q.author}')">📲 WhatsApp</button>
-                    <a href="https://github.com/${REPO}/discussions" target="_blank" class="dc-btn" style="text-decoration:none;">💬 Discuss</a>
-                </div>
+        <div class="action-row no-export">
+          <button class="btn-share btn-wa" onclick="exportToWA(${i})">📲 WhatsApp Share</button>
+          <div id="giscus-slot-${i}" style="width:100%;"></div>
+        </div>
+      </div>
+    `;
+    track.appendChild(slide);
+  });
 
-                <div id="giscus-${i}"></div>
-            </div>
-        `;
-        track.appendChild(slide);
-    });
-    document.getElementById('deckOverlay').classList.add('open');
-    deckGoTo(startIdx, false);
+  document.getElementById('deckOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setPositionByIndex();
 }
 
-function deckGoTo(idx, animate = true) {
-    _deckIdx = Math.max(0, Math.min(idx, _deckQuotes.length - 1));
-    const track = document.getElementById('deckTrack');
-    track.style.transition = animate ? 'transform 0.4s' : 'none';
-    track.style.transform = `translateX(-${_deckIdx * 100}%)`;
-    document.getElementById('deckCounter').textContent = `${_deckIdx + 1} / ${_deckQuotes.length}`;
-    loadGiscus(_deckIdx);
+function setPositionByIndex() {
+  currentTranslate = deckIndex * -window.innerWidth;
+  prevTranslate = currentTranslate;
+  setSliderTransform();
+  document.getElementById('deckCounter').innerText = `${String(deckIndex + 1).padStart(2, '0')} / ${String(currentDeck.length).padStart(2, '0')}`;
 }
 
-function loadGiscus(idx) {
-    const container = document.getElementById(`giscus-${idx}`);
-    if (container.innerHTML !== '') return;
-    const script = document.createElement('script');
-    script.src = "https://giscus.app/client.js";
-    script.setAttribute("data-repo", REPO);
-    script.setAttribute("data-repo-id", "R_kgDORI8-yw");
-    script.setAttribute("data-category", "General");
-    script.setAttribute("data-category-id", "DIC_kwDORI8-y84C1-Jq");
-    script.setAttribute("data-mapping", "specific");
-    script.setAttribute("data-term", _deckQuotes[idx].quote.substring(0, 50));
-    script.setAttribute("data-theme", "preferred_color_scheme");
-    script.crossOrigin = "anonymous"; script.async = true;
-    container.appendChild(script);
+function setSliderTransform() {
+  document.getElementById('deckTrack').style.transform = `translateX(${currentTranslate}px)`;
 }
 
-// NAVIGATION & DIRECTORY
-function setupNav() {
-    document.querySelectorAll('.quick-tab').forEach(tab => {
-        tab.onclick = () => {
-            const type = tab.dataset.tab;
-            if (type === 'all') {
-                document.querySelectorAll('.quick-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                renderFeed(allQuotes);
-            } else {
-                openDir(type);
-            }
-        };
-    });
+function initTouchEngine() {
+  const swipeArea = document.getElementById('swipeArea');
+  
+  swipeArea.addEventListener('touchstart', touchStart);
+  swipeArea.addEventListener('touchend', touchEnd);
+  swipeArea.addEventListener('touchmove', touchMove);
 
-    document.getElementById('deckClose').onclick = () => document.getElementById('deckOverlay').classList.remove('open');
-    document.getElementById('dirClose').onclick = closeDir;
-    document.getElementById('dirBackdrop').onclick = closeDir;
+  function touchStart(event) {
+    startX = event.touches[0].clientX;
+    isDragging = true;
+    animationID = requestAnimationFrame(animation);
+  }
 
-    window.onkeydown = (e) => {
-        if (!document.getElementById('deckOverlay').classList.contains('open')) return;
-        if (e.key === 'ArrowRight') deckGoTo(_deckIdx + 1);
-        if (e.key === 'ArrowLeft') deckGoTo(_deckIdx - 1);
-        if (e.key === 'Escape') document.getElementById('deckOverlay').classList.remove('open');
+  function touchMove(event) {
+    if (isDragging) {
+      const currentX = event.touches[0].clientX;
+      currentTranslate = prevTranslate + currentX - startX;
+    }
+  }
+
+  function touchEnd() {
+    isDragging = false;
+    cancelAnimationFrame(animationID);
+    const movedBy = currentTranslate - prevTranslate;
+
+    if (movedBy < -100 && deckIndex < currentDeck.length - 1) deckIndex += 1;
+    if (movedBy > 100 && deckIndex > 0) deckIndex -= 1;
+
+    setPositionByIndex();
+  }
+
+  function animation() {
+    setSliderTransform();
+    if (isDragging) requestAnimationFrame(animation);
+  }
+}
+
+/* ─── DIRECTORY & NAV ─── */
+function initNavigation() {
+  document.querySelectorAll('.quick-tab').forEach(btn => {
+    btn.onclick = () => {
+      const tab = btn.dataset.tab;
+      if (tab === 'all') {
+        renderFeed(allQuotes);
+        setActiveTab(btn);
+      } else {
+        openDirectory(tab);
+      }
     };
+  });
+
+  document.getElementById('deckClose').onclick = () => {
+    document.getElementById('deckOverlay').classList.remove('open');
+    document.body.style.overflow = 'auto';
+  };
+  
+  document.getElementById('dirClose').onclick = closeDirectory;
+  document.getElementById('dirBackdrop').onclick = closeDirectory;
 }
 
-function openDir(type) {
-    const panel = document.getElementById('dirPanel');
-    const list = document.getElementById('dirList');
-    const title = document.getElementById('dirTitle');
-    list.innerHTML = '';
-    title.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+function openDirectory(type) {
+  const list = document.getElementById('dirList');
+  const title = document.getElementById('dirTitle');
+  list.innerHTML = '';
+  title.innerText = type.charAt(0).toUpperCase() + type.slice(1);
+  
+  const map = {};
+  allQuotes.forEach(q => {
+    const key = type === 'authors' ? q.author : (type === 'contributors' ? q.contributor : q.department);
+    if (!map[key]) map[key] = [];
+    map[key].push(q);
+  });
 
-    const map = {};
-    allQuotes.forEach(q => {
-        const key = type === 'authors' ? q.author : (type === 'contributors' ? q.contributor : q.department);
-        if (!map[key]) map[key] = [];
-        map[key].push(q);
+  Object.keys(map).sort().forEach(key => {
+    const row = document.createElement('div');
+    row.className = 'dir-row';
+    row.innerHTML = `<span>${key}</span><span class="dir-count">${map[key].length}</span>`;
+    row.onclick = () => {
+      renderFeed(map[key]);
+      closeDirectory();
+    };
+    list.appendChild(row);
+  });
+
+  document.getElementById('dirPanel').classList.add('open');
+  document.getElementById('dirBackdrop').style.display = 'block';
+}
+
+function closeDirectory() {
+  document.getElementById('dirPanel').classList.remove('open');
+  document.getElementById('dirBackdrop').style.display = 'none';
+}
+
+function setActiveTab(activeBtn) {
+  document.querySelectorAll('.quick-tab').forEach(b => b.classList.remove('active'));
+  activeBtn.classList.add('active');
+}
+
+/* ─── THE WHATSAPP IMAGE EXPORT ENGINE ─── */
+async function exportToWA(idx) {
+  const q = currentDeck[idx];
+  const btn = event.target;
+  const originalText = btn.innerText;
+  btn.innerText = "Generating Beauty...";
+
+  try {
+    const cardElement = document.getElementById(`card-to-export-${idx}`);
+    
+    // Create a clone for rendering to avoid UI artifacts
+    const clone = cardElement.cloneNode(true);
+    clone.querySelector('.no-export').remove(); // Remove buttons from image
+    clone.style.width = "500px";
+    clone.style.background = "#ffffff";
+    document.getElementById('share-canvas-container').appendChild(clone);
+
+    const canvas = await html2canvas(clone, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#faf7f2"
     });
 
-    Object.keys(map).sort().forEach(name => {
-        const row = document.createElement('div');
-        row.className = 'dir-row';
-        row.innerHTML = `<strong>${name}</strong> <span style="float:right; color:var(--gold); font-family:var(--mono);">${map[name].length}</span>`;
-        row.onclick = () => {
-            renderFeed(map[name]);
-            closeDir();
-        };
-        list.appendChild(row);
-    });
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const file = new File([blob], 'quote.png', { type: 'image/png' });
 
-    panel.classList.add('open');
-    document.getElementById('dirBackdrop').style.display = 'block';
+    // Try Web Share API first (Mobile)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'A Quote A Day',
+        text: `"${q.quote}" — Shared from A Quote A Day.`
+      });
+    } else {
+      // Fallback for desktop: Copy to clipboard or direct link
+      const dataUrl = canvas.toDataURL();
+      const link = document.createElement('a');
+      link.download = `quote-${idx}.png`;
+      link.href = dataUrl;
+      link.click();
+      alert("Image downloaded! You can now share it to WhatsApp.");
+    }
+    
+    clone.remove();
+  } catch (err) {
+    console.error(err);
+    alert("Export Error: " + err.message);
+  } finally {
+    btn.innerText = originalText;
+  }
 }
 
-function closeDir() {
-    document.getElementById('dirPanel').classList.remove('open');
-    document.getElementById('dirBackdrop').style.display = 'none';
-}
-
-function shareWA(text, author) {
-    const str = encodeURIComponent(`"${text}" — ${author}\n\nView more at: https://andrewveda.github.io/a-quote-a-day`);
-    window.open(`https://wa.me/?text=${str}`);
-}
-
-function setupGestures() {
-    let touchStartX = 0;
-    const overlay = document.getElementById('deckOverlay');
-    overlay.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
-    overlay.addEventListener('touchend', e => {
-        const diff = touchStartX - e.changedTouches[0].screenX;
-        if (Math.abs(diff) > 50) {
-            if (diff > 0) deckGoTo(_deckIdx + 1);
-            else deckGoTo(_deckIdx - 1);
-        }
-    });
-}
+/* ─── KEYBOARD ENGINE ─── */
+window.onkeydown = (e) => {
+  if (document.getElementById('deckOverlay').classList.contains('open')) {
+    if (e.key === 'ArrowRight') { deckIndex = Math.min(deckIndex + 1, currentDeck.length - 1); setPositionByIndex(); }
+    if (e.key === 'ArrowLeft') { deckIndex = Math.max(deckIndex - 1, 0); setPositionByIndex(); }
+    if (e.key === 'Escape') document.getElementById('deckClose').click();
+  }
+};
 </script>
 </body>
 </html>
