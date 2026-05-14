@@ -1,8 +1,3 @@
-/**
- * ARCHIVE ENGINE v3.0
- * Deep-Linking, Relational Indexing & Physics-Based UI
- */
-
 const CONFIG = {
     REPO: "AndrewVeda/a-quote-a-day",
     DIR: "quotes",
@@ -30,32 +25,44 @@ async function initApp() {
         jumpToQuote(quoteId);
     }
 }
-
-/* ─── DATA ARCHITECTURE ─── */
 async function fetchArchive() {
-    const loader = document.getElementById('loader');
+    const mainContent = document.getElementById('mainContent');
     try {
         const response = await fetch(`https://api.github.com/repos/${CONFIG.REPO}/contents/${CONFIG.DIR}`);
-        const files = await response.json();
+        if (!response.ok) throw new Error('Network response was not ok');
         
-        const promises = files.filter(f => f.name.endsWith('.md')).map(async (file, index) => {
-            const raw = await fetch(file.download_url).then(r => r.text());
-            return parseEntry(raw, file.name, index + 1); // ID starts from 1
+        const files = await response.json();
+        const mdFiles = files.filter(f => f.name.endsWith('.md'));
+
+        const promises = mdFiles.map(async (file, index) => {
+            try {
+                const raw = await fetch(file.download_url).then(r => r.text());
+                return parseEntry(raw, file.name, index + 1);
+            } catch (e) { return null; }
         });
 
         DB = (await Promise.all(promises)).filter(Boolean);
-        DB.sort((a, b) => b.date - a.date); // Newest first for main feed
+        DB.sort((a, b) => b.date - a.date);
         
-        renderGrid(DB);
-        updateMetadata();
+        // Ensure "All" view only renders if we actually have data
+        if (DB.length > 0) {
+            document.getElementById('mastCount').innerText = `${DB.length} Quotes`;
+            renderGrid(DB); 
+        } else {
+            throw new Error('Archive is empty');
+        }
+
     } catch (err) {
         console.error("Archive Fetch Error:", err);
-        document.getElementById('mainContent').innerHTML = `<div class="empty-state">Unable to sync with the academic archive. Check your connection.</div>`;
+        mainContent.innerHTML = `<div class="empty-state" style="padding:40px; text-align:center;">
+            <p>Syncing Academic Archive...</p>
+            <button onclick="location.reload()" class="btn-premium" style="margin-top:20px;">Retry Connection</button>
+        </div>`;
     } finally {
+        const loader = document.getElementById('loader');
         if(loader) loader.style.display = 'none';
     }
 }
-
 function parseEntry(md, filename, fallbackId) {
     const match = md.match(/---([\s\S]*?)---/);
     if (!match) return null;
@@ -175,40 +182,65 @@ function updateDeckPosition(animate = true) {
 
 async function shareToWhatsApp(idx) {
     const q = currentView[idx];
-    const target = document.getElementById(`export-target-${idx}`);
-    const btn = event.target;
-    btn.innerText = "Formatting for WhatsApp...";
+    const btn = event.currentTarget;
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = "<span>Formatting Masterpiece...</span>";
 
     try {
-        const canvas = await html2canvas(target, {
+        // Create a dedicated Export Container
+        const stage = document.getElementById('share-canvas-container');
+        stage.innerHTML = `
+            <div id="poster-export" style="width:540px; height:960px; background:#faf7f2; padding:60px; display:flex; flex-direction:column; font-family:'Raleway', sans-serif; position:relative; border-top:10px solid #c9a84c;">
+                <div style="font-family:'IM Fell English', serif; font-style:italic; font-size:24px; color:#c9a84c; margin-bottom:40px;">A Quote A Day</div>
+                
+                <div style="font-family:'Playfair Display', serif; font-style:italic; font-size:32px; line-height:1.4; color:#1a1a1a; border-left:4px solid #c9a84c; padding-left:20px; margin-bottom:40px;">
+                    "${q.quote}"
+                </div>
+                
+                <div style="font-family:'Playfair Display', serif; font-weight:900; font-size:36px; margin-bottom:5px;">${q.author}</div>
+                <div style="font-family:'DM Mono', monospace; font-size:10px; color:#b0a99f; text-transform:uppercase; letter-spacing:2px; margin-bottom:60px;">Quoted Source</div>
+                
+                <div style="background:rgba(201,168,76,0.1); border-radius:15px; padding:30px; border-left:5px solid #c9a84c;">
+                    <div style="font-family:'DM Mono', monospace; font-size:9px; color:#c9a84c; font-weight:700; text-transform:uppercase; margin-bottom:10px;">Reflection by ${q.contributor}</div>
+                    <div style="font-family:'Raleway', sans-serif; font-style:italic; font-size:16px; color:#5a5650; line-height:1.6;">
+                        ${q.about || "This quote was archived for its profound wisdom."}
+                    </div>
+                </div>
+
+                <div style="margin-top:auto; font-family:'DM Mono', monospace; font-size:9px; color:#b0a99f; text-transform:uppercase; letter-spacing:1px;">
+                    SRM VEC ENGLISH DEPT · ARCHIVE NO. ${q.id}
+                </div>
+            </div>
+        `;
+
+        const canvas = await html2canvas(document.getElementById('poster-export'), {
             scale: 2,
             useCORS: true,
-            ignoreElements: (el) => el.classList.contains('no-export'),
             backgroundColor: "#faf7f2"
         });
 
-        const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-        const file = new File([blob], `quote-${q.id}.png`, { type: 'image/png' });
+        const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.9));
+        const file = new File([blob], `SRM-Archive-${q.id}.jpg`, { type: 'image/jpeg' });
         const shareLink = `${window.location.origin}${window.location.pathname}?id=${q.id}`;
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
                 files: [file],
                 title: `Wisdom from ${q.author}`,
-                text: `Check out this reflection by ${q.contributor} on SRM VEC English Archive.\n\n🔗 ${shareLink}`
+                text: `Read the full reflection at: ${shareLink}`
             });
         } else {
-            // Fallback for desktops
-            const dataUrl = canvas.toDataURL();
             const link = document.createElement('a');
-            link.href = dataUrl;
-            link.download = `Quote-${q.id}.png`;
+            link.href = canvas.toDataURL("image/jpeg");
+            link.download = `SRM-Archive-${q.id}.jpg`;
             link.click();
         }
+        stage.innerHTML = ''; // Clean up
     } catch (err) {
         console.error("Export Error:", err);
+        alert("Image generation failed. Try again.");
     } finally {
-        btn.innerText = "📲 Send via WhatsApp";
+        btn.innerHTML = originalContent;
     }
 }
 
