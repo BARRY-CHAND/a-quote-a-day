@@ -127,10 +127,23 @@ function openDirectory(category) {
     document.getElementById('dirBackdrop').style.display = 'block';
 }
 
-/* ─── DECK VIEWER & DEEP LINKING ─── */
 function openDeck(quotes, startIdx) {
     currentView = quotes;
     deckIdx = startIdx;
+    
+    // 1. Setup Progress Dots (Visual anchor from screenshot)
+    const topBar = document.querySelector('.deck-topbar');
+    let dotsHtml = '<div class="progress-container">';
+    quotes.forEach((_, i) => {
+        dotsHtml += `<div class="progress-dot ${i === startIdx ? 'active' : ''}" id="dot-${i}"></div>`;
+    });
+    dotsHtml += '</div>';
+    
+    // Inject or update dots
+    const existingDots = document.querySelector('.progress-container');
+    if (existingDots) existingDots.remove();
+    document.getElementById('deckCounter').insertAdjacentHTML('afterend', dotsHtml);
+
     const track = document.getElementById('deckTrack');
     track.innerHTML = '';
 
@@ -139,24 +152,31 @@ function openDeck(quotes, startIdx) {
         slide.className = 'deck-slide';
         slide.innerHTML = `
             <div class="deck-card" id="export-target-${i}">
-                <div class="dc-kicker">Wisdom Archive #${q.id}</div>
+                <div class="dc-kicker">QUOTE #${q.id} · ${q.dateStr.toUpperCase()}</div>
                 <div class="dc-quote">"${q.quote}"</div>
                 <div class="dc-author">${q.author}</div>
-                <div class="dc-role">Source Author</div>
+                <div class="dc-role">Quoted Author</div>
                 
                 <div class="dc-contrib-envelope">
-                    <div class="dc-contrib-label">Curated By</div>
+                    <div class="dc-contrib-label">CONTRIBUTED BY</div>
                     <div class="dc-contrib-name">${q.contributor}</div>
-                    <div class="dc-contrib-dept">English Department · ${q.department}</div>
-                    ${q.about ? `<div class="dc-reflection">${q.about}</div>` : ''}
+                    <div class="dc-contrib-dept">${q.department}</div>
+                    
+                    <div style="height:1px; background:var(--gold-border); margin:20px 0;"></div>
+                    <div class="dc-contrib-label">WHAT THIS MEANS TO ME</div>
+                    <div class="dc-reflection">"${q.about || "A reflection of wisdom."}"</div>
                 </div>
 
-                <div class="action-grid no-export">
-                    <button class="btn-premium wa" onclick="shareToWhatsApp(${i})">📲 Send via WhatsApp</button>
-                    <button class="btn-premium" onclick="copyDeepLink('${q.id}')">🔗 Copy Link</button>
+                <div class="deck-action-row no-export">
+                    <button class="btn-action discuss" onclick="openGiscus(${i})">💬 DISCUSS</button>
+                    <button class="btn-action" onclick="shareToWhatsApp(${i})">📲 WHATSAPP</button>
+                    <button class="btn-action" onclick="shareAsImage(${i})">📸 SHARE</button>
+                    <a href="https://andrewveda.github.io/a-quote-a-day/submissions" target="_blank" class="btn-action" style="text-decoration:none;">
+                        ✏️ ADD A QUOTE
+                    </a>
                 </div>
                 
-                <div class="giscus-mount" id="giscus-slot-${i}" style="margin-top:30px;"></div>
+                <div class="giscus-mount" id="giscus-slot-${i}" style="margin-top:30px; display:none;"></div>
             </div>
         `;
         track.appendChild(slide);
@@ -171,12 +191,16 @@ function updateDeckPosition(animate = true) {
     track.style.transition = animate ? 'transform 0.4s var(--spring)' : 'none';
     track.style.transform = `translateX(${-deckIdx * 100}vw)`;
     
-    document.getElementById('deckCounter').innerText = `${String(deckIdx + 1).padStart(2, '0')} / ${String(currentView.length).padStart(2, '0')}`;
+    document.getElementById('deckCounter').innerText = `${deckIdx + 1} / ${currentView.length}`;
     
-    // Update URL without refreshing the page
+    // Update active dot
+    document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === deckIdx);
+    });
+
     const q = currentView[deckIdx];
     window.history.replaceState(null, null, `?id=${q.id}`);
-    
+}
     loadGiscus(deckIdx);
 }
 
