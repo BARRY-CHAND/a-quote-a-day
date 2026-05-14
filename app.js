@@ -153,9 +153,13 @@ function renderGrid(quotes) {
         card.setAttribute('tabindex', '0');
         card.setAttribute('role', 'button');
         card.setAttribute('aria-label', `Quote by ${q.author}`);
+        const snippet = q.about && q.about.trim()
+            ? `<div class="q-card-reflection">"${q.about.length > 120 ? q.about.slice(0, 117) + '…' : q.about}"<span class="q-card-reflection-by"> — ${q.contributor}</span></div>`
+            : '';
         card.innerHTML = `
             <div class="q-card-num">No. ${q.id} · ${q.dateStr}</div>
             <div class="q-card-text">"${q.quote}"</div>
+            ${snippet}
             <div class="q-card-footer">
                 <div>
                     <div class="q-card-author">${q.author}</div>
@@ -213,6 +217,8 @@ function setupNavigation() {
 
             if (tab === 'all') {
                 renderGrid(DB);
+            } else if (tab === 'departments') {
+                renderGroupedGrid('department');
             } else {
                 openDirectory(tab);
             }
@@ -338,7 +344,74 @@ function updateDeckPosition(animate = true) {
     loadGiscus(deckIdx);
 }
 
-/* ─── DIRECTORY ─── */
+/* ─── RENDER GROUPED GRID (Departments) ─── */
+function renderGroupedGrid(groupBy) {
+    const container = document.getElementById('mainContent');
+    container.innerHTML = '';
+
+    const index = {};
+    DB.forEach(item => {
+        const key = item[groupBy] || 'Other';
+        if (!index[key]) index[key] = [];
+        index[key].push(item);
+    });
+
+    const sorted = Object.keys(index).sort((a, b) => index[b].length - index[a].length);
+
+    sorted.forEach(groupName => {
+        const groupQuotes = index[groupName];
+
+        const section = document.createElement('div');
+        section.className = 'dept-section';
+
+        const heading = document.createElement('div');
+        heading.className = 'dept-heading';
+        heading.innerHTML = `
+            <span class="dept-heading-name">${groupName}</span>
+            <span class="dept-heading-count">${groupQuotes.length} ${groupQuotes.length === 1 ? 'quote' : 'quotes'}</span>
+        `;
+        section.appendChild(heading);
+
+        const grid = document.createElement('div');
+        grid.className = 'col-grid';
+
+        groupQuotes.forEach((q, i) => {
+            const card = document.createElement('div');
+            card.className = 'q-card';
+            card.style.animationDelay = `${Math.min(i * 30, 300)}ms`;
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('role', 'button');
+            card.setAttribute('aria-label', `Quote by ${q.author}`);
+
+            const snippet = q.about && q.about.trim()
+                ? `<div class="q-card-reflection">"${q.about.length > 120 ? q.about.slice(0, 117) + '…' : q.about}"<span class="q-card-reflection-by"> — ${q.contributor}</span></div>`
+                : '';
+
+            card.innerHTML = `
+                <div class="q-card-num">No. ${q.id} · ${q.dateStr}</div>
+                <div class="q-card-text">"${q.quote}"</div>
+                ${snippet}
+                <div class="q-card-footer">
+                    <div>
+                        <div class="q-card-author">${q.author}</div>
+                        <div class="q-card-dept">${q.department}</div>
+                    </div>
+                    <div class="q-card-arrow">→</div>
+                </div>
+            `;
+            card.addEventListener('click', () => openDeck(groupQuotes, i));
+            card.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') openDeck(groupQuotes, i);
+            });
+            grid.appendChild(card);
+        });
+
+        section.appendChild(grid);
+        container.appendChild(section);
+    });
+}
+
+
 function openDirectory(category) {
     const list = document.getElementById('dirList');
     list.innerHTML = '';
