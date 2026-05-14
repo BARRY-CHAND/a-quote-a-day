@@ -257,48 +257,42 @@ function openDeck(quotes, startIdx) {
         const hasReflection = q.about && q.about.trim().length > 0;
 
         slide.innerHTML = `
-            <div class="deck-layout">
+            <div class="deck-card" id="export-target-${i}">
+                <div class="dc-body">
+                    <div class="dc-kicker">Quote #${q.id} · ${q.dateStr}</div>
 
-                <!-- LEFT: quote + reflection (70%) -->
-                <div class="deck-left">
-                    <div class="deck-card" id="export-target-${i}">
-                        <div class="dc-body">
-                            <div class="dc-kicker">Quote #${q.id} · ${q.dateStr}</div>
-                            <div class="dc-quote">"${q.quote}"</div>
-                            <div class="dc-byline">
-                                <div class="dc-author">${q.author}</div>
-                                <div class="dc-role">Quoted Author</div>
-                            </div>
-                            <div class="dc-envelope">
-                                <div class="dc-env-label">Contributed by</div>
-                                <div class="dc-contrib-name">${q.contributor}</div>
-                                <div class="dc-contrib-dept">${q.department}</div>
-                                ${hasReflection ? `
-                                    <div class="dc-divider"></div>
-                                    <div class="dc-reflection-label">What this means to me</div>
-                                    <div class="dc-reflection">"${q.about}"</div>
-                                ` : ''}
-                            </div>
-                        </div>
-                        <div class="deck-action-row no-export">
-                            <button class="btn-premium-action btn-whatsapp" onclick="shareToWhatsApp(${i})">
-                                📲 Share
-                            </button>
-                            <a href="https://andrewveda.github.io/a-quote-a-day/submissions"
-                               target="_blank" rel="noopener"
-                               class="btn-premium-action btn-submit">
-                                ✏️ Add a Quote
-                            </a>
-                        </div>
+                    <div class="dc-quote">"${q.quote}"</div>
+
+                    <div class="dc-byline">
+                        <div class="dc-author">${q.author}</div>
+                        <div class="dc-role">Quoted Author</div>
+                    </div>
+
+                    <div class="dc-envelope">
+                        <div class="dc-env-label">Contributed by</div>
+                        <div class="dc-contrib-name">${q.contributor}</div>
+                        <div class="dc-contrib-dept">${q.department}</div>
+
+                        ${hasReflection ? `
+                            <div class="dc-divider"></div>
+                            <div class="dc-reflection-label">What this means to me</div>
+                            <div class="dc-reflection">"${q.about}"</div>
+                        ` : ''}
                     </div>
                 </div>
 
-                <!-- RIGHT: giscus comments (30%) -->
-                <div class="deck-right">
-                    <div class="deck-comments-label">Discussion</div>
-                    <div class="giscus-mount" id="giscus-slot-${i}"></div>
+                <div class="deck-action-row no-export">
+                    <button class="btn-premium-action btn-whatsapp" onclick="shareToWhatsApp(${i})">
+                        📲 Share
+                    </button>
+                    <a href="https://andrewveda.github.io/a-quote-a-day/submissions"
+                       target="_blank" rel="noopener"
+                       class="btn-premium-action btn-submit">
+                        ✏️ Add a Quote
+                    </a>
                 </div>
 
+                <div class="giscus-mount" id="giscus-slot-${i}"></div>
             </div>
         `;
         track.appendChild(slide);
@@ -523,17 +517,18 @@ async function shareToWhatsApp(idx) {
     try {
         const stage = document.getElementById('share-canvas-container');
 
+        // Dynamic font sizing based on quote length
         const qLen = q.quote.length;
-        const quoteFontSize  = qLen < 50  ? 72 : qLen < 80  ? 60 : qLen < 120 ? 48 : qLen < 180 ? 38 : 30;
-        const authorFontSize = q.author.length < 15 ? 52 : q.author.length < 25 ? 42 : 34;
-        const contribFontSize = q.contributor.length < 12 ? 48 : q.contributor.length < 20 ? 38 : 30;
-        const reflFontSize   = q.about && q.about.length < 100 ? 24 : 19;
+        const quoteFontSize = qLen < 60 ? 58 : qLen < 100 ? 46 : qLen < 160 ? 36 : 28;
+        const authorFontSize = q.author.length < 20 ? 38 : 30;
 
+        // Reflection block
         const reflectionBlock = q.about ? `
             <div style="
-                background: #1c1a16;
-                padding: 28px 40px;
-                flex-shrink: 0;
+                margin-top: 0;
+                background: rgba(184,145,58,0.13);
+                border-left: 5px solid #b8913a;
+                padding: 22px 26px;
             ">
                 <div style="
                     font-family: 'DM Mono', monospace;
@@ -541,14 +536,14 @@ async function shareToWhatsApp(idx) {
                     letter-spacing: 4px;
                     text-transform: uppercase;
                     color: #b8913a;
-                    margin-bottom: 12px;
-                ">What this means to me</div>
+                    margin-bottom: 10px;
+                ">Reflection</div>
                 <div style="
                     font-family: 'Cormorant Garamond', Georgia, serif;
                     font-style: italic;
-                    font-size: ${reflFontSize}px;
-                    line-height: 1.45;
-                    color: #f5f0e8;
+                    font-size: 20px;
+                    line-height: 1.55;
+                    color: #2a2620;
                 ">"${q.about}"</div>
             </div>` : '';
 
@@ -563,108 +558,118 @@ async function shareToWhatsApp(idx) {
                 position: relative;
                 font-family: 'Cormorant Garamond', Georgia, serif;
             ">
-                <!-- Ghost watermark -->
+                <!-- Decorative large background quote mark -->
                 <div style="
                     position: absolute;
-                    top: -30px; left: -10px;
-                    font-size: 500px;
+                    top: -40px;
+                    left: -20px;
+                    font-family: 'Cormorant Garamond', Georgia, serif;
+                    font-size: 420px;
                     line-height: 1;
-                    color: rgba(184,145,58,0.07);
-                    font-style: italic;
+                    color: rgba(184,145,58,0.09);
                     pointer-events: none;
-                    z-index: 0;
+                    user-select: none;
+                    font-style: italic;
                 ">"</div>
 
-                <!-- TOP BAR -->
+                <!-- TOP BAND -->
                 <div style="
                     background: #1c1a16;
-                    padding: 16px 32px;
+                    padding: 18px 36px;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     flex-shrink: 0;
-                    z-index: 1;
                 ">
-                    <div style="font-family:'Cormorant Garamond',Georgia,serif; font-style:italic; font-size:22px; color:#b8913a;">A Quote A Day</div>
-                    <div style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:rgba(184,145,58,0.5);">SRM VEC · No.${q.id}</div>
+                    <div style="
+                        font-family: 'IM Fell English', Georgia, serif;
+                        font-style: italic;
+                        font-size: 20px;
+                        color: #b8913a;
+                        letter-spacing: 0.5px;
+                    ">A Quote A Day</div>
+                    <div style="
+                        font-family: 'DM Mono', monospace;
+                        font-size: 9px;
+                        letter-spacing: 3px;
+                        text-transform: uppercase;
+                        color: rgba(184,145,58,0.6);
+                    ">No. ${q.id}</div>
                 </div>
 
                 <!-- GOLD RULE -->
-                <div style="height:5px; background:linear-gradient(to right,#6b3f10,#b8913a,#e8c97a,#b8913a,#6b3f10); flex-shrink:0; z-index:1;"></div>
+                <div style="height: 4px; background: linear-gradient(to right, #b8913a, #e8c97a, #b8913a); flex-shrink:0;"></div>
 
-                <!-- QUOTE BLOCK -->
+                <!-- MAIN QUOTE BLOCK -->
                 <div style="
                     flex: 1;
-                    padding: 32px 36px 24px;
+                    padding: 36px 40px 24px;
                     display: flex;
                     flex-direction: column;
-                    justify-content: center;
-                    z-index: 1;
+                    justify-content: space-between;
                     overflow: hidden;
                 ">
-                    <div style="
-                        font-size: ${quoteFontSize}px;
-                        font-style: italic;
-                        font-weight: 600;
-                        line-height: 1.2;
-                        color: #1c1a16;
-                        letter-spacing: -0.5px;
-                        margin-bottom: 28px;
-                    ">"${q.quote}"</div>
-
-                    <!-- Author row -->
-                    <div style="
-                        border-top: 2px solid #b8913a;
-                        padding-top: 20px;
-                        display: flex;
-                        flex-direction: column;
-                        gap: 4px;
-                    ">
+                    <!-- The Quote -->
+                    <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
                         <div style="
-                            font-size: ${authorFontSize}px;
-                            font-weight: 700;
-                            line-height: 1.05;
+                            font-family: 'Cormorant Garamond', Georgia, serif;
+                            font-style: italic;
+                            font-size: ${quoteFontSize}px;
+                            font-weight: 600;
+                            line-height: 1.25;
                             color: #1c1a16;
                             letter-spacing: -0.5px;
-                        ">${q.author}</div>
-                        <div style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:#b8913a; margin-top:4px;">Quoted Author</div>
+                            position: relative;
+                            z-index: 1;
+                        ">"${q.quote}"</div>
+
+                        <!-- Author -->
+                        <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(184,145,58,0.3);">
+                            <div style="
+                                font-family: 'Cormorant Garamond', Georgia, serif;
+                                font-weight: 700;
+                                font-size: ${authorFontSize}px;
+                                color: #1c1a16;
+                                letter-spacing: -0.3px;
+                                line-height: 1.1;
+                            ">${q.author}</div>
+                            <div style="
+                                font-family: 'DM Mono', monospace;
+                                font-size: 9px;
+                                letter-spacing: 3px;
+                                text-transform: uppercase;
+                                color: #b8913a;
+                                margin-top: 6px;
+                            ">Quoted by ${q.contributor} · ${q.department}</div>
+                        </div>
                     </div>
+
+                    <!-- Reflection -->
+                    ${reflectionBlock}
                 </div>
 
-                <!-- CONTRIBUTOR BAND -->
-                <div style="
-                    background: #b8913a;
-                    padding: 20px 36px;
-                    flex-shrink: 0;
-                    z-index: 1;
-                ">
-                    <div style="font-family:'DM Mono',monospace; font-size:8px; letter-spacing:4px; text-transform:uppercase; color:rgba(28,26,22,0.6); margin-bottom:6px;">Shared by</div>
-                    <div style="
-                        font-size: ${contribFontSize}px;
-                        font-weight: 700;
-                        font-style: italic;
-                        line-height: 1.05;
-                        color: #1c1a16;
-                        letter-spacing: -0.5px;
-                    ">${q.contributor}</div>
-                    <div style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(28,26,22,0.55); margin-top:5px;">${q.department}</div>
-                </div>
-
-                <!-- REFLECTION BLOCK -->
-                ${reflectionBlock}
-
-                <!-- BOTTOM BAR -->
+                <!-- BOTTOM BAND -->
                 <div style="
                     background: #1c1a16;
-                    padding: 12px 32px;
+                    padding: 14px 36px;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     flex-shrink: 0;
-                    z-index: 1;
                 ">
-                    <div style="font-family:'DM Mono',monospace; font-size:8px; letter-spacing:2px; text-transform:uppercase; color:rgba(184,145,58,0.45);">andrewveda.github.io/a-quote-a-day</div>
-                    <div style="font-family:'DM Mono',monospace; font-size:8px; letter-spacing:1px; color:rgba(184,145,58,0.3);">${q.dateStr}</div>
+                    <div style="
+                        font-family: 'DM Mono', monospace;
+                        font-size: 9px;
+                        letter-spacing: 2px;
+                        text-transform: uppercase;
+                        color: rgba(184,145,58,0.55);
+                    ">SRM VEC English Archive</div>
+                    <div style="
+                        font-family: 'DM Mono', monospace;
+                        font-size: 8px;
+                        letter-spacing: 1px;
+                        color: rgba(184,145,58,0.35);
+                    ">${q.dateStr}</div>
                 </div>
             </div>`;
 
