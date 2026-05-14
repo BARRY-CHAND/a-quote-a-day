@@ -3,7 +3,7 @@ name: Build Quotes
 on:
   push:
     paths:
-  - 'quotes/*.md'
+      - 'quotes/*.md'
 
 jobs:
   build:
