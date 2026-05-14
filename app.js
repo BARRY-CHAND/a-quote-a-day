@@ -516,29 +516,160 @@ async function shareToWhatsApp(idx) {
 
     try {
         const stage = document.getElementById('share-canvas-container');
+
+        // Dynamic font sizing based on quote length
+        const qLen = q.quote.length;
+        const quoteFontSize = qLen < 60 ? 58 : qLen < 100 ? 46 : qLen < 160 ? 36 : 28;
+        const authorFontSize = q.author.length < 20 ? 38 : 30;
+
+        // Reflection block
+        const reflectionBlock = q.about ? `
+            <div style="
+                margin-top: 0;
+                background: rgba(184,145,58,0.13);
+                border-left: 5px solid #b8913a;
+                padding: 22px 26px;
+            ">
+                <div style="
+                    font-family: 'DM Mono', monospace;
+                    font-size: 9px;
+                    letter-spacing: 4px;
+                    text-transform: uppercase;
+                    color: #b8913a;
+                    margin-bottom: 10px;
+                ">Reflection</div>
+                <div style="
+                    font-family: 'Cormorant Garamond', Georgia, serif;
+                    font-style: italic;
+                    font-size: 20px;
+                    line-height: 1.55;
+                    color: #2a2620;
+                ">"${q.about}"</div>
+            </div>` : '';
+
         stage.innerHTML = `
             <div id="poster-export" style="
-                width:540px; min-height:900px;
-                background:#f8f5ef; padding:60px;
-                display:flex; flex-direction:column;
-                border-top:8px solid #b8913a;
-                font-family:'Cormorant Garamond', Georgia, serif;
+                width: 540px;
+                height: 960px;
+                background: #f5f0e8;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                position: relative;
+                font-family: 'Cormorant Garamond', Georgia, serif;
             ">
-                <div style="font-size:10px; letter-spacing:3px; text-transform:uppercase; color:#b8913a; margin-bottom:30px;">
-                    A Quote A Day · No. ${q.id}
+                <!-- Decorative large background quote mark -->
+                <div style="
+                    position: absolute;
+                    top: -40px;
+                    left: -20px;
+                    font-family: 'Cormorant Garamond', Georgia, serif;
+                    font-size: 420px;
+                    line-height: 1;
+                    color: rgba(184,145,58,0.09);
+                    pointer-events: none;
+                    user-select: none;
+                    font-style: italic;
+                ">"</div>
+
+                <!-- TOP BAND -->
+                <div style="
+                    background: #1c1a16;
+                    padding: 18px 36px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    flex-shrink: 0;
+                ">
+                    <div style="
+                        font-family: 'IM Fell English', Georgia, serif;
+                        font-style: italic;
+                        font-size: 20px;
+                        color: #b8913a;
+                        letter-spacing: 0.5px;
+                    ">A Quote A Day</div>
+                    <div style="
+                        font-family: 'DM Mono', monospace;
+                        font-size: 9px;
+                        letter-spacing: 3px;
+                        text-transform: uppercase;
+                        color: rgba(184,145,58,0.6);
+                    ">No. ${q.id}</div>
                 </div>
-                <div style="font-size:28px; font-style:italic; line-height:1.5; border-left:4px solid #b8913a; padding-left:20px; margin-bottom:36px; color:#1c1a16;">
-                    "${q.quote}"
+
+                <!-- GOLD RULE -->
+                <div style="height: 4px; background: linear-gradient(to right, #b8913a, #e8c97a, #b8913a); flex-shrink:0;"></div>
+
+                <!-- MAIN QUOTE BLOCK -->
+                <div style="
+                    flex: 1;
+                    padding: 36px 40px 24px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    overflow: hidden;
+                ">
+                    <!-- The Quote -->
+                    <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+                        <div style="
+                            font-family: 'Cormorant Garamond', Georgia, serif;
+                            font-style: italic;
+                            font-size: ${quoteFontSize}px;
+                            font-weight: 600;
+                            line-height: 1.25;
+                            color: #1c1a16;
+                            letter-spacing: -0.5px;
+                            position: relative;
+                            z-index: 1;
+                        ">"${q.quote}"</div>
+
+                        <!-- Author -->
+                        <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(184,145,58,0.3);">
+                            <div style="
+                                font-family: 'Cormorant Garamond', Georgia, serif;
+                                font-weight: 700;
+                                font-size: ${authorFontSize}px;
+                                color: #1c1a16;
+                                letter-spacing: -0.3px;
+                                line-height: 1.1;
+                            ">${q.author}</div>
+                            <div style="
+                                font-family: 'DM Mono', monospace;
+                                font-size: 9px;
+                                letter-spacing: 3px;
+                                text-transform: uppercase;
+                                color: #b8913a;
+                                margin-top: 6px;
+                            ">Quoted by ${q.contributor} · ${q.department}</div>
+                        </div>
+                    </div>
+
+                    <!-- Reflection -->
+                    ${reflectionBlock}
                 </div>
-                <div style="font-size:30px; font-weight:700; color:#1c1a16; margin-bottom:4px;">${q.author}</div>
-                <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#8a837a; margin-bottom:36px;">Quoted Author</div>
-                ${q.about ? `
-                <div style="background:rgba(184,145,58,0.08); border-left:4px solid #b8913a; padding:24px; border-radius:0 12px 12px 0;">
-                    <div style="font-size:9px; letter-spacing:3px; text-transform:uppercase; color:#b8913a; margin-bottom:10px;">Reflection by ${q.contributor}</div>
-                    <div style="font-style:italic; font-size:16px; line-height:1.7; color:#4a4640;">"${q.about}"</div>
-                </div>` : ''}
-                <div style="margin-top:auto; padding-top:36px; border-top:1px solid rgba(184,145,58,0.22); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#c5bdb5;">
-                    andrewveda.github.io/a-quote-a-day
+
+                <!-- BOTTOM BAND -->
+                <div style="
+                    background: #1c1a16;
+                    padding: 14px 36px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    flex-shrink: 0;
+                ">
+                    <div style="
+                        font-family: 'DM Mono', monospace;
+                        font-size: 9px;
+                        letter-spacing: 2px;
+                        text-transform: uppercase;
+                        color: rgba(184,145,58,0.55);
+                    ">SRM VEC English Archive</div>
+                    <div style="
+                        font-family: 'DM Mono', monospace;
+                        font-size: 8px;
+                        letter-spacing: 1px;
+                        color: rgba(184,145,58,0.35);
+                    ">${q.dateStr}</div>
                 </div>
             </div>`;
 
