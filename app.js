@@ -280,7 +280,10 @@ function loadGiscus(idx) {
     script.setAttribute("data-category", "General");
     script.setAttribute("data-category-id", "DIC_kwDORI8-y84C1-Jq");
     script.setAttribute("data-mapping", "specific");
-    script.setAttribute("data-term", `Quote-ID-${currentView[idx].id}`);
+   script.setAttribute(
+  "data-term",
+  `${currentView[idx].author} — ${currentView[idx].contributor}`
+);
     script.setAttribute("data-theme", "preferred_color_scheme");
     script.crossOrigin = "anonymous";
     script.async = true;
