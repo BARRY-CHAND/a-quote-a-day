@@ -546,10 +546,13 @@ async function shareToWhatsApp(idx) {
         const blob   = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.92));
         const file   = new File([blob], `Quote-${q.id}.jpg`, { type: 'image/jpeg' });
 
+        const shareUrl = `https://andrewveda.github.io/a-quote-a-day/?id=${q.id}`;
+        const shareText = `Check out this reflection by ${q.contributor.toUpperCase()} on SRM VEC English Archive.\n\n🔗 ${shareUrl}`;
+
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
                 files: [file],
-                text: `"${q.quote}" — ${q.author}\n\nShared from A Quote A Day`,
+                text: shareText,
             });
         } else {
             const link  = document.createElement('a');
