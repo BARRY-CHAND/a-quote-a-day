@@ -1,8 +1,8 @@
 ---
-quote: "Through perseverance many people win success out of what seemed destined to be certain failure."
-author: Benjamin Disraeli
-what_it_means_to_me: "This quote teaches me that persistence and continuous effort can turn failure into success. Even when situations seem hopeless, perseverance gives us the strength to overcome challenges."
+quote: "A smooth sea never made a skilled sailor."
+author: Franklin D. Roosevelt
+what_it_means_to_me: "This quote teaches me that challenges and struggles in life help us grow stronger, wiser, and more capable. Without difficulties, we cannot truly develop strength and experience."
 contributor: Lohendra V S
 department: EIE
-tags: ["perseverance", "success", "motivation"]
+tags: ["struggles", "growth", "life", "strength"]
 ---
