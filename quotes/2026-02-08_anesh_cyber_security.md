@@ -1,5 +1,5 @@
 ---
-quote: Not every journey becomes a chapter of life, but each one leaves us with memories and lessons that shape our present and guide our future.
+quote: Not every journey becomes a chapter of life but each one leaves us with memories and lessons that shape our present and guide our future.
 author: Simon Peter
 contributor: Anesh
 department: Cyber Security

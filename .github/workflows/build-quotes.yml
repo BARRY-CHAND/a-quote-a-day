@@ -1,0 +1,41 @@
+name: Build Quotes
+
+on:
+  push:
+    paths:
+      - 'quotes/*.md'
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Convert Markdown to JSON
+        run: node scripts/md-to-json.js
+
+      - name: Commit Generated JSON Files
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git add quotes/*.json
+
+          git diff --cached --quiet || git commit -m "Auto-generate JSON from Markdown"
+
+          git push
