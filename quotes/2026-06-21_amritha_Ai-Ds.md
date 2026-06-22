@@ -4,7 +4,6 @@ author: William Shakespeare
 what_it_means_to_me: A poor player struts and frets their time upon the stage, awaiting the curtain uncalled for.
 contributor: Amritha
 department: AI-DS-1
-source: Tomorrow, and Tomorrow, and Tomorrow
-(Novel by Gabrielle Zevin)
+source: Tomorrow, and Tomorrow, and Tomorrow, a Novel by Gabrielle Zevin
 tags: soliloquy
 ---
