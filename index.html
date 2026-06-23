@@ -36,6 +36,32 @@
                 <span class="search-icon">⌕</span>
             </div>
         </nav>
+        <!-- COMPACT BAR (visible only when scrolled on mobile) -->
+<div class="masthead-compact-bar">
+  <span class="masthead-compact-title">A Quote A Day</span>
+  <div class="masthead-compact-actions">
+    <button class="compact-icon-btn" id="compactSearchBtn" aria-label="Search">⌕</button>
+    <button class="compact-icon-btn" id="compactFilterBtn" aria-label="Filter">≡</button>
+  </div>
+</div>
+<!-- COMPACT SEARCH BAR -->
+<div class="compact-search-bar" id="compactSearchBar">
+  <input type="text" id="compactSearchInput" placeholder="Search quotes, authors…" autocomplete="off" />
+</div>
+
+<!-- FILTER BOTTOM SHEET -->
+<div class="filter-sheet-backdrop" id="filterSheetBackdrop">
+  <div class="filter-sheet">
+    <div class="filter-sheet-handle"></div>
+    <div class="filter-sheet-title">View</div>
+    <div class="filter-sheet-tabs" id="filterSheetTabs">
+      <button class="filter-sheet-tab active" data-tab="all">All Quotes</button>
+      <button class="filter-sheet-tab" data-tab="authors">By Author</button>
+      <button class="filter-sheet-tab" data-tab="contributors">By Contributor</button>
+      <button class="filter-sheet-tab" data-tab="departments">By Dept</button>
+    </div>
+  </div>
+</div>
     </header>
 
     <!-- MAIN GRID -->
