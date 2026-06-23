@@ -1,4 +1,4 @@
-
+/* ─── 0. RESET & BASE ─── */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
