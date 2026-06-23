@@ -1,10 +1,3 @@
-/* ═══════════════════════════════════════════
-   A QUOTE A DAY — app.js v2
-   Bug fixes: dirClose, dirBackdrop, arrow keys,
-   progress dots, arrow buttons, search,
-   masthead scroll shrink, staggered animations
-═══════════════════════════════════════════ */
-
 const CONFIG = {
     REPO: "AndrewVeda/a-quote-a-day",
     DIR:  "quotes",
