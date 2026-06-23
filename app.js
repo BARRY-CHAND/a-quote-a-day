@@ -1,8 +1,6 @@
 /* ═══════════════════════════════════════════
-   A QUOTE A DAY — app.js v2
-   Bug fixes: dirClose, dirBackdrop, arrow keys,
-   progress dots, arrow buttons, search,
-   masthead scroll shrink, staggered animations
+   A QUOTE A DAY — app.js
+   Compact mobile masthead integrated
 ═══════════════════════════════════════════ */
 
 const CONFIG = {
@@ -15,10 +13,32 @@ let currentView = [];
 let deckIdx     = 0;
 let currentTab  = 'all';
 
-/* ─── MASTHEAD SCROLL ─── */
+/* ─── MASTHEAD SCROLL ─────────────────────────────────────────
+   Single listener handles both the `scrolled` shadow on desktop
+   and the `masthead--compact` collapse on mobile (< 768px).
+───────────────────────────────────────────────────────────── */
 const mastheadEl = document.getElementById('masthead');
+const COMPACT_THRESHOLD = 80; // px before compacting on mobile
+
 window.addEventListener('scroll', () => {
-    mastheadEl.classList.toggle('scrolled', window.scrollY > 20);
+    const y = window.scrollY;
+
+    // Desktop: subtle shadow when scrolled
+    mastheadEl.classList.toggle('scrolled', y > 20);
+
+    // Mobile only: collapse to compact bar
+    if (window.innerWidth < 768) {
+        mastheadEl.classList.toggle('masthead--compact', y > COMPACT_THRESHOLD);
+    } else {
+        mastheadEl.classList.remove('masthead--compact');
+    }
+}, { passive: true });
+
+// Also remove compact class if the window is resized to desktop width
+window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+        mastheadEl.classList.remove('masthead--compact');
+    }
 }, { passive: true });
 
 /* ─── DATELINE ─── */
@@ -52,6 +72,7 @@ function closeDeck() {
 document.addEventListener('DOMContentLoaded', async () => {
     await fetchArchive();
     setupNavigation();
+    setupCompactMasthead();
     setupSwipeEngine();
     setupSearch();
 
@@ -68,7 +89,7 @@ async function fetchArchive() {
         );
         if (!response.ok) throw new Error('Network error');
 
-        const files  = await response.json();
+        const files   = await response.json();
         const mdFiles = files.filter(f => f.name.endsWith('.md'));
 
         const promises = mdFiles.map(async (file, i) => {
@@ -188,7 +209,6 @@ function setupSearch() {
         debounceTimer = setTimeout(() => {
             const q = input.value.trim().toLowerCase();
             if (!q) {
-                // Restore current tab view
                 if (currentTab === 'all') renderGrid(DB);
                 return;
             }
@@ -206,7 +226,7 @@ function setupSearch() {
 
 /* ─── NAVIGATION ─── */
 function setupNavigation() {
-    /* Tab buttons */
+    // Tab buttons
     document.querySelectorAll('.quick-tab').forEach(btn => {
         btn.addEventListener('click', () => {
             const tab = btn.dataset.tab;
@@ -225,20 +245,95 @@ function setupNavigation() {
         });
     });
 
-    /* Deck close */
+    // Deck close
     document.getElementById('deckClose').addEventListener('click', closeDeck);
 
-    /* Arrow buttons */
+    // Arrow buttons
     document.getElementById('arrowPrev').addEventListener('click', () => moveDeck(-1));
     document.getElementById('arrowNext').addEventListener('click', () => moveDeck(1));
 
-    /* Directory panel close */
+    // Directory panel close
     document.getElementById('dirClose').addEventListener('click', closeDirectory);
     document.getElementById('dirBackdrop').addEventListener('click', closeDirectory);
 
-    /* Click outside deck (on overlay bg) to close */
+    // Click outside deck (on overlay bg) to close
     document.getElementById('deckOverlay').addEventListener('click', e => {
         if (e.target === e.currentTarget) closeDeck();
+    });
+}
+
+/* ─── COMPACT MASTHEAD ─────────────────────────────────────── */
+function setupCompactMasthead() {
+    const compactSearchBtn   = document.getElementById('compactSearchBtn');
+    const compactSearchBar   = document.getElementById('compactSearchBar');
+    const compactSearchInput = document.getElementById('compactSearchInput');
+    const mainSearchInput    = document.getElementById('searchInput');
+    const filterBtn          = document.getElementById('compactFilterBtn');
+    const sheetBackdrop      = document.getElementById('filterSheetBackdrop');
+    const sheetTabs          = document.getElementById('filterSheetTabs');
+
+    // ── Search icon ──
+    compactSearchBtn.addEventListener('click', () => {
+        const isOpen = compactSearchBar.classList.toggle('open');
+        if (isOpen) {
+            compactSearchInput.focus();
+        } else {
+            compactSearchInput.value = '';
+            mainSearchInput.value = '';
+            mainSearchInput.dispatchEvent(new Event('input'));
+        }
+    });
+
+    // Mirror compact search into the main search input so existing filter logic runs
+    compactSearchInput.addEventListener('input', () => {
+        mainSearchInput.value = compactSearchInput.value;
+        mainSearchInput.dispatchEvent(new Event('input'));
+    });
+
+    // ── Filter sheet ──
+    filterBtn.addEventListener('click', () => {
+        sheetBackdrop.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    });
+
+    sheetBackdrop.addEventListener('click', e => {
+        if (e.target === sheetBackdrop) closeFilterSheet();
+    });
+
+    function closeFilterSheet() {
+        sheetBackdrop.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    // Sheet tab → trigger the matching main nav tab so existing handler runs
+    sheetTabs.addEventListener('click', e => {
+        const btn = e.target.closest('.filter-sheet-tab');
+        if (!btn) return;
+
+        const tab = btn.dataset.tab;
+
+        // Update sheet active state
+        sheetTabs.querySelectorAll('.filter-sheet-tab').forEach(b =>
+            b.classList.toggle('active', b === btn)
+        );
+
+        // Fire the main tab's click so all existing routing logic triggers
+        const mainTab = document.querySelector(`.quick-tab[data-tab="${tab}"]`);
+        if (mainTab) mainTab.click();
+
+        closeFilterSheet();
+    });
+
+    // Keep sheet highlights in sync when main tabs are clicked directly
+    document.querySelectorAll('.quick-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            if (sheetTabs) {
+                sheetTabs.querySelectorAll('.filter-sheet-tab').forEach(b =>
+                    b.classList.toggle('active', b.dataset.tab === tab)
+                );
+            }
+        });
     });
 }
 
@@ -258,8 +353,6 @@ function openDeck(quotes, startIdx) {
 
         slide.innerHTML = `
             <div class="deck-layout">
-
-                <!-- LEFT: quote + reflection (70%) -->
                 <div class="deck-left">
                     <div class="deck-card" id="export-target-${i}">
                         <div class="dc-body">
@@ -292,13 +385,10 @@ function openDeck(quotes, startIdx) {
                         </div>
                     </div>
                 </div>
-
-                <!-- RIGHT: giscus comments (30%) -->
                 <div class="deck-right">
                     <div class="deck-comments-label">Discussion</div>
                     <div class="giscus-mount" id="giscus-slot-${i}"></div>
                 </div>
-
             </div>
         `;
         track.appendChild(slide);
@@ -319,20 +409,17 @@ function updateDeckPosition(animate = true) {
         : 'none';
     track.style.transform = `translateX(${-deckIdx * 100}vw)`;
 
-    /* Counter */
     const counter = document.getElementById('deckCounter');
     if (counter) counter.innerText = `${deckIdx + 1} / ${currentView.length}`;
 
-    /* Arrow states */
     const prev = document.getElementById('arrowPrev');
     const next = document.getElementById('arrowNext');
     if (prev) prev.disabled = deckIdx === 0;
     if (next) next.disabled = deckIdx === currentView.length - 1;
 
-    /* Progress dots — show max 7 dots */
-    const wrap  = document.getElementById('deckProgressWrap');
+    const wrap = document.getElementById('deckProgressWrap');
     if (wrap) {
-        const total  = currentView.length;
+        const total   = currentView.length;
         const maxDots = Math.min(total, 7);
         wrap.innerHTML = '';
         for (let i = 0; i < maxDots; i++) {
@@ -342,11 +429,9 @@ function updateDeckPosition(animate = true) {
         }
     }
 
-    /* URL sync */
     const q = currentView[deckIdx];
     if (q) window.history.replaceState(null, null, `?id=${q.id}`);
 
-    /* Lazy-load giscus */
     loadGiscus(deckIdx);
 }
 
@@ -417,7 +502,7 @@ function renderGroupedGrid(groupBy) {
     });
 }
 
-
+/* ─── DIRECTORY ─── */
 function openDirectory(category) {
     const list = document.getElementById('dirList');
     list.innerHTML = '';
@@ -499,9 +584,7 @@ function setupSwipeEngine() {
     area.addEventListener('touchend', () => {
         if (!dragging) return;
         dragging = false;
-        if (Math.abs(dist) > 70) {
-            moveDeck(dist < 0 ? 1 : -1);
-        }
+        if (Math.abs(dist) > 70) moveDeck(dist < 0 ? 1 : -1);
         dist = 0;
     });
 }
@@ -524,147 +607,41 @@ async function shareToWhatsApp(idx) {
         const stage = document.getElementById('share-canvas-container');
 
         const qLen = q.quote.length;
-        const quoteFontSize  = qLen < 50  ? 72 : qLen < 80  ? 60 : qLen < 120 ? 48 : qLen < 180 ? 38 : 30;
-        const authorFontSize = q.author.length < 15 ? 52 : q.author.length < 25 ? 42 : 34;
+        const quoteFontSize   = qLen < 50  ? 72 : qLen < 80  ? 60 : qLen < 120 ? 48 : qLen < 180 ? 38 : 30;
+        const authorFontSize  = q.author.length < 15 ? 52 : q.author.length < 25 ? 42 : 34;
         const contribFontSize = q.contributor.length < 12 ? 48 : q.contributor.length < 20 ? 38 : 30;
-        const reflFontSize   = q.about && q.about.length < 100 ? 24 : 19;
+        const reflFontSize    = q.about && q.about.length < 100 ? 24 : 19;
 
         const reflectionBlock = q.about ? `
-            <div style="
-                background: #1c1a16;
-                padding: 28px 40px;
-                flex-shrink: 0;
-            ">
-                <div style="
-                    font-family: 'DM Mono', monospace;
-                    font-size: 9px;
-                    letter-spacing: 4px;
-                    text-transform: uppercase;
-                    color: #b8913a;
-                    margin-bottom: 12px;
-                ">What this means to me</div>
-                <div style="
-                    font-family: 'Cormorant Garamond', Georgia, serif;
-                    font-style: italic;
-                    font-size: ${reflFontSize}px;
-                    line-height: 1.45;
-                    color: #f5f0e8;
-                ">"${q.about}"</div>
+            <div style="background:#1c1a16;padding:28px 40px;flex-shrink:0;">
+                <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:#b8913a;margin-bottom:12px;">What this means to me</div>
+                <div style="font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:${reflFontSize}px;line-height:1.45;color:#f5f0e8;">"${q.about}"</div>
             </div>` : '';
 
         stage.innerHTML = `
-            <div id="poster-export" style="
-                width: 540px;
-                height: 960px;
-                background: #f5f0e8;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                position: relative;
-                font-family: 'Cormorant Garamond', Georgia, serif;
-            ">
-                <!-- Ghost watermark -->
-                <div style="
-                    position: absolute;
-                    top: -30px; left: -10px;
-                    font-size: 500px;
-                    line-height: 1;
-                    color: rgba(184,145,58,0.07);
-                    font-style: italic;
-                    pointer-events: none;
-                    z-index: 0;
-                ">"</div>
-
-                <!-- TOP BAR -->
-                <div style="
-                    background: #1c1a16;
-                    padding: 16px 32px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    flex-shrink: 0;
-                    z-index: 1;
-                ">
-                    <div style="font-family:'Cormorant Garamond',Georgia,serif; font-style:italic; font-size:22px; color:#b8913a;">A Quote A Day</div>
-                    <div style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:rgba(184,145,58,0.5);">SRM VEC · No.${q.id}</div>
+            <div id="poster-export" style="width:540px;height:960px;background:#f5f0e8;display:flex;flex-direction:column;overflow:hidden;position:relative;font-family:'Cormorant Garamond',Georgia,serif;">
+                <div style="position:absolute;top:-30px;left:-10px;font-size:500px;line-height:1;color:rgba(184,145,58,0.07);font-style:italic;pointer-events:none;z-index:0;">"</div>
+                <div style="background:#1c1a16;padding:16px 32px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;z-index:1;">
+                    <div style="font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:22px;color:#b8913a;">A Quote A Day</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(184,145,58,0.5);">SRM VEC · No.${q.id}</div>
                 </div>
-
-                <!-- GOLD RULE -->
-                <div style="height:5px; background:linear-gradient(to right,#6b3f10,#b8913a,#e8c97a,#b8913a,#6b3f10); flex-shrink:0; z-index:1;"></div>
-
-                <!-- QUOTE BLOCK -->
-                <div style="
-                    flex: 1;
-                    padding: 32px 36px 24px;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    z-index: 1;
-                    overflow: hidden;
-                ">
-                    <div style="
-                        font-size: ${quoteFontSize}px;
-                        font-style: italic;
-                        font-weight: 600;
-                        line-height: 1.2;
-                        color: #1c1a16;
-                        letter-spacing: -0.5px;
-                        margin-bottom: 28px;
-                    ">"${q.quote}"</div>
-
-                    <!-- Author row -->
-                    <div style="
-                        border-top: 2px solid #b8913a;
-                        padding-top: 20px;
-                        display: flex;
-                        flex-direction: column;
-                        gap: 4px;
-                    ">
-                        <div style="
-                            font-size: ${authorFontSize}px;
-                            font-weight: 700;
-                            line-height: 1.05;
-                            color: #1c1a16;
-                            letter-spacing: -0.5px;
-                        ">${q.author}</div>
-                        <div style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:#b8913a; margin-top:4px;">Quoted Author</div>
+                <div style="height:5px;background:linear-gradient(to right,#6b3f10,#b8913a,#e8c97a,#b8913a,#6b3f10);flex-shrink:0;z-index:1;"></div>
+                <div style="flex:1;padding:32px 36px 24px;display:flex;flex-direction:column;justify-content:center;z-index:1;overflow:hidden;">
+                    <div style="font-size:${quoteFontSize}px;font-style:italic;font-weight:600;line-height:1.2;color:#1c1a16;letter-spacing:-0.5px;margin-bottom:28px;">"${q.quote}"</div>
+                    <div style="border-top:2px solid #b8913a;padding-top:20px;display:flex;flex-direction:column;gap:4px;">
+                        <div style="font-size:${authorFontSize}px;font-weight:700;line-height:1.05;color:#1c1a16;letter-spacing:-0.5px;">${q.author}</div>
+                        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#b8913a;margin-top:4px;">Quoted Author</div>
                     </div>
                 </div>
-
-                <!-- CONTRIBUTOR BAND -->
-                <div style="
-                    background: #b8913a;
-                    padding: 20px 36px;
-                    flex-shrink: 0;
-                    z-index: 1;
-                ">
-                    <div style="font-family:'DM Mono',monospace; font-size:8px; letter-spacing:4px; text-transform:uppercase; color:rgba(28,26,22,0.6); margin-bottom:6px;">Shared by</div>
-                    <div style="
-                        font-size: ${contribFontSize}px;
-                        font-weight: 700;
-                        font-style: italic;
-                        line-height: 1.05;
-                        color: #1c1a16;
-                        letter-spacing: -0.5px;
-                    ">${q.contributor}</div>
-                    <div style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(28,26,22,0.55); margin-top:5px;">${q.department}</div>
+                <div style="background:#b8913a;padding:20px 36px;flex-shrink:0;z-index:1;">
+                    <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:4px;text-transform:uppercase;color:rgba(28,26,22,0.6);margin-bottom:6px;">Shared by</div>
+                    <div style="font-size:${contribFontSize}px;font-weight:700;font-style:italic;line-height:1.05;color:#1c1a16;letter-spacing:-0.5px;">${q.contributor}</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(28,26,22,0.55);margin-top:5px;">${q.department}</div>
                 </div>
-
-                <!-- REFLECTION BLOCK -->
                 ${reflectionBlock}
-
-                <!-- BOTTOM BAR -->
-                <div style="
-                    background: #1c1a16;
-                    padding: 12px 32px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    flex-shrink: 0;
-                    z-index: 1;
-                ">
-                    <div style="font-family:'DM Mono',monospace; font-size:8px; letter-spacing:2px; text-transform:uppercase; color:rgba(184,145,58,0.45);">andrewveda.github.io/a-quote-a-day</div>
-                    <div style="font-family:'DM Mono',monospace; font-size:8px; letter-spacing:1px; color:rgba(184,145,58,0.3);">${q.dateStr}</div>
+                <div style="background:#1c1a16;padding:12px 32px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;z-index:1;">
+                    <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(184,145,58,0.45);">andrewveda.github.io/a-quote-a-day</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:rgba(184,145,58,0.3);">${q.dateStr}</div>
                 </div>
             </div>`;
 
@@ -672,14 +649,11 @@ async function shareToWhatsApp(idx) {
         const blob   = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.92));
         const file   = new File([blob], `Quote-${q.id}.jpg`, { type: 'image/jpeg' });
 
-        const shareUrl = `https://andrewveda.github.io/a-quote-a-day/?id=${q.id}`;
+        const shareUrl  = `https://andrewveda.github.io/a-quote-a-day/?id=${q.id}`;
         const shareText = `Check out this reflection by ${q.contributor.toUpperCase()} on SRM VEC English Archive.\n\n🔗 ${shareUrl}`;
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                files: [file],
-                text: shareText,
-            });
+            await navigator.share({ files: [file], text: shareText });
         } else {
             const link  = document.createElement('a');
             link.href   = canvas.toDataURL();
