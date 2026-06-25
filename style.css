@@ -259,8 +259,6 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 }
 
-.mobile-reading-guide { display: none; }
-
 /* QUOTE CARD */
 .q-card {
     background: var(--surface);
@@ -321,17 +319,11 @@ body {
 .q-card-dept { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-ghost); }
 
 .q-card-arrow {
-    min-width: 54px;
-    min-height: 30px;
-    padding: 0 12px;
-    border-radius: 999px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
     border: 1px solid var(--gold-border);
     display: flex; align-items: center; justify-content: center;
-    font-family: var(--mono);
-    font-size: 8px;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    color: var(--gold);
+    font-size: 12px; color: var(--gold);
     flex-shrink: 0;
     transition: all 0.25s var(--spring);
 }
@@ -769,19 +761,6 @@ body {
     border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 
-.deck-comment-prompt {
-    font-family: var(--serif);
-    font-style: italic;
-    font-size: 1rem;
-    line-height: 1.45;
-    color: rgba(255,255,255,0.72);
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 16px;
-}
-
 /* ─── 8. DECK CARD ─── */
 .deck-card {
     background: var(--surface);
@@ -920,39 +899,9 @@ body {
 /* ─── 10. MOBILE ─── */
 @media (max-width: 767px) {
 
-    .masthead {
-        background: rgba(248, 245, 239, 0.96);
-    }
-
-    .masthead-inner { padding: 18px 16px 12px; }
+    .masthead-inner { padding: 16px 16px 10px; }
     .masthead-meta { flex-direction: column; gap: 8px; }
-    .masthead-title { font-size: clamp(38px, 13vw, 54px); }
-    .masthead-subtitle { font-size: 8px; letter-spacing: 2.2px; }
-    .meta-pill { min-width: 0; padding: 4px 12px; }
-    .masthead-meta .meta-pill:first-child { display: none; }
-    .nav-bar {
-        justify-content: flex-start;
-        flex-wrap: nowrap;
-        padding: 10px 14px 14px;
-        gap: 8px;
-        scroll-padding-left: 14px;
-    }
-    .quick-tab {
-        min-height: 42px;
-        padding: 10px 16px;
-        font-size: 9px;
-        letter-spacing: 1.4px;
-    }
-    .search-wrap {
-        flex: 0 0 210px;
-        margin-left: 2px;
-    }
-    .search-input,
-    .search-input:focus {
-        width: 100%;
-        min-height: 42px;
-        font-size: 12px;
-    }
+    .meta-pill { min-width: 0; }
 
     /* Compact masthead */
     .masthead--compact .top-rule,
@@ -981,9 +930,9 @@ body {
     .masthead-compact-actions { display: flex; gap: 8px; }
 
     .compact-icon-btn {
-        width: 42px; height: 42px;
+        width: 34px; height: 34px;
         border: 1px solid var(--gold-border);
-        border-radius: 14px;
+        border-radius: 8px;
         background: var(--gold-pale);
         cursor: pointer;
         display: flex; align-items: center; justify-content: center;
@@ -993,11 +942,11 @@ body {
     }
     .compact-icon-btn:hover { background: var(--gold); color: white; border-color: var(--gold); }
 
-    .compact-search-bar { display: none; padding: 0 16px 12px; }
+    .compact-search-bar { display: none; padding: 0 16px 10px; }
     .compact-search-bar.open { display: block; }
     .compact-search-bar input {
         width: 100%; box-sizing: border-box;
-        padding: 12px 14px;
+        padding: 8px 14px;
         border: 1px solid var(--gold-border);
         border-radius: 30px;
         font-family: var(--sans); font-size: 11px; letter-spacing: 0.5px;
@@ -1033,7 +982,7 @@ body {
     .filter-sheet-title { font-family: var(--mono); font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 14px; }
     .filter-sheet-tabs { display: flex; flex-direction: column; gap: 6px; }
     .filter-sheet-tab {
-        width: 100%; padding: 16px 18px;
+        width: 100%; padding: 14px 18px;
         text-align: left;
         border: 1px solid var(--gold-border); border-radius: 12px;
         background: transparent;
@@ -1045,77 +994,9 @@ body {
     .filter-sheet-tab.active { background: var(--gold); border-color: var(--gold); color: white; font-weight: 500; }
 
     /* Grid */
-    .newspaper-body { padding: 18px 12px 88px; }
-    .mobile-reading-guide {
-        display: block;
-        background: linear-gradient(135deg, rgba(184,145,58,0.16), rgba(255,255,255,0.72));
-        border: 1px solid var(--gold-border);
-        border-radius: 24px;
-        padding: 20px 18px;
-        margin-bottom: 18px;
-        box-shadow: var(--sh-sm);
-    }
-    .mobile-guide-kicker {
-        font-family: var(--mono);
-        font-size: 8px;
-        letter-spacing: 3px;
-        text-transform: uppercase;
-        color: var(--gold);
-        margin-bottom: 8px;
-    }
-    .mobile-guide-title {
-        font-family: var(--fell);
-        font-style: italic;
-        font-weight: 400;
-        font-size: 1.85rem;
-        line-height: 1;
-        color: var(--ink);
-        margin-bottom: 10px;
-    }
-    .mobile-guide-copy {
-        font-family: var(--sans);
-        font-size: 0.98rem;
-        line-height: 1.48;
-        color: var(--ink-mid);
-        margin-bottom: 14px;
-    }
-    .mobile-guide-steps {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-    }
-    .mobile-guide-steps span {
-        min-height: 42px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        border-radius: 999px;
-        background: var(--surface);
-        border: 1px solid var(--gold-border);
-        font-family: var(--mono);
-        font-size: 8px;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        color: var(--ink-muted);
-    }
-    .results-header { margin-bottom: 16px; }
-    .col-grid { grid-template-columns: 1fr; gap: 14px; }
-    .q-card {
-        padding: 22px 18px 18px;
-        gap: 16px;
-        border-radius: 22px;
-        min-height: 210px;
-    }
-    .q-card::before { font-size: 96px; right: 14px; }
-    .q-card-text { font-size: 1.42rem; line-height: 1.42; }
-    .q-card-reflection { font-size: 0.9rem; line-height: 1.55; }
-    .q-card-footer { align-items: flex-end; }
-    .q-card-arrow {
-        min-width: 66px;
-        min-height: 38px;
-        font-size: 8px;
-    }
+    .newspaper-body { padding: 24px 12px 80px; }
+    .col-grid { grid-template-columns: 1fr; gap: 12px; }
+    .q-card { padding: 20px 16px 16px; gap: 14px; }
 
     /* Hall of Fame on mobile — stack vertically */
     .hof-podium {
@@ -1134,16 +1015,15 @@ body {
     .contrib-grid { grid-template-columns: 1fr; gap: 10px; }
 
     /* Deck */
-    .deck-topbar { padding: 14px 14px 10px; position: sticky; background: rgba(8, 7, 5, 0.88); backdrop-filter: blur(16px); }
-    .deck-slide { padding-top: 8px; overflow-y: auto; }
+    .deck-slide { padding-top: 64px; overflow-y: auto; }
     .deck-layout { flex-direction: column; min-height: unset; }
-    .deck-left { width: 100%; padding: 12px 10px 4px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); overflow-y: visible; }
-    .deck-right { width: 100%; padding: 18px 12px 32px; background: rgba(0,0,0,0.18); }
+    .deck-left { width: 100%; padding: 12px 12px 4px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); overflow-y: visible; }
+    .deck-right { width: 100%; padding: 16px 12px 24px; background: rgba(0,0,0,0.18); }
     .deck-card { border-radius: 18px; }
-    .dc-body { padding: 24px 20px 14px; }
+    .dc-body { padding: 20px 18px 14px; }
     .dc-kicker { font-size: 8px; letter-spacing: 3px; margin-bottom: 16px; }
-    .dc-quote { font-size: clamp(24px, 7vw, 32px); line-height: 1.32; padding-left: 16px; border-left-width: 3px; margin-bottom: 22px; }
-    .dc-author { font-size: 23px; }
+    .dc-quote { font-size: 18px; line-height: 1.4; padding-left: 14px; border-left-width: 3px; margin-bottom: 18px; }
+    .dc-author { font-size: 20px; }
     .dc-role { font-size: 9px; margin-top: 3px; }
     .dc-byline { margin-bottom: 18px; }
     .dc-envelope { padding: 16px; border-radius: 12px; margin-bottom: 16px; }
@@ -1151,10 +1031,9 @@ body {
     .dc-contrib-name { font-size: 18px; }
     .dc-contrib-dept { font-size: 8px; margin-top: 2px; }
     .dc-divider { margin: 12px 0; }
-    .dc-reflection { font-size: 15px; line-height: 1.65; }
+    .dc-reflection { font-size: 13px; line-height: 1.6; }
     .deck-action-row { padding: 0 18px 18px; gap: 8px; flex-direction: row; }
-    .btn-premium-action { padding: 13px 14px; font-size: 10px; min-width: 0; min-height: 44px; }
-    .deck-comment-prompt { font-size: 1.08rem; }
+    .btn-premium-action { padding: 10px 14px; font-size: 10px; min-width: 0; }
     .deck-nav-arrows { display: none; }
     .search-input { width: 130px; }
     .search-input:focus { width: 160px; }
