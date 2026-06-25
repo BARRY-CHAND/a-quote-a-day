@@ -1,6 +1,8 @@
 /* ═══════════════════════════════════════════
    A QUOTE A DAY — app.js
-   Compact mobile masthead integrated
+   - Scroll-to-top fix on tab switch
+   - Contributor Hall of Fame + profile cards
+   - Compact mobile masthead
 ═══════════════════════════════════════════ */
 
 const CONFIG = {
@@ -13,20 +15,13 @@ let currentView = [];
 let deckIdx     = 0;
 let currentTab  = 'all';
 
-/* ─── MASTHEAD SCROLL ─────────────────────────────────────────
-   Single listener handles both the `scrolled` shadow on desktop
-   and the `masthead--compact` collapse on mobile (< 768px).
-───────────────────────────────────────────────────────────── */
+/* ─── MASTHEAD SCROLL ─── */
 const mastheadEl = document.getElementById('masthead');
-const COMPACT_THRESHOLD = 80; // px before compacting on mobile
+const COMPACT_THRESHOLD = 80;
 
 window.addEventListener('scroll', () => {
     const y = window.scrollY;
-
-    // Desktop: subtle shadow when scrolled
     mastheadEl.classList.toggle('scrolled', y > 20);
-
-    // Mobile only: collapse to compact bar
     if (window.innerWidth < 768) {
         mastheadEl.classList.toggle('masthead--compact', y > COMPACT_THRESHOLD);
     } else {
@@ -34,11 +29,8 @@ window.addEventListener('scroll', () => {
     }
 }, { passive: true });
 
-// Also remove compact class if the window is resized to desktop width
 window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768) {
-        mastheadEl.classList.remove('masthead--compact');
-    }
+    if (window.innerWidth >= 768) mastheadEl.classList.remove('masthead--compact');
 }, { passive: true });
 
 /* ─── DATELINE ─── */
@@ -49,9 +41,9 @@ document.getElementById('mastDateline').innerText =
 document.addEventListener('keydown', e => {
     const overlay = document.getElementById('deckOverlay');
     if (!overlay.classList.contains('open')) return;
-    if (e.key === 'Escape')       closeDeck();
-    if (e.key === 'ArrowRight')   moveDeck(1);
-    if (e.key === 'ArrowLeft')    moveDeck(-1);
+    if (e.key === 'Escape')     closeDeck();
+    if (e.key === 'ArrowRight') moveDeck(1);
+    if (e.key === 'ArrowLeft')  moveDeck(-1);
 });
 
 function moveDeck(dir) {
@@ -66,6 +58,13 @@ function closeDeck() {
     document.getElementById('deckOverlay').classList.remove('open');
     document.body.style.overflow = '';
     window.history.replaceState(null, null, window.location.pathname);
+}
+
+/* ─── SCROLL TO TOP (instant, no jank) ─── */
+function resetScroll() {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    // Also force-remove compact state so masthead re-appears immediately
+    mastheadEl.classList.remove('masthead--compact');
 }
 
 /* ─── INIT ─── */
@@ -112,7 +111,7 @@ async function fetchArchive() {
         document.getElementById('mainContent').innerHTML = `
             <div class="empty-state">
                 <p>⚠️ Could not load archive.</p>
-                <button onclick="location.reload()" style="margin-top:20px; padding:10px 24px; border:1px solid var(--gold-border); border-radius:30px; cursor:pointer; font-family:var(--sans); background:var(--gold); color:white;">
+                <button onclick="location.reload()" style="margin-top:20px;padding:10px 24px;border:1px solid var(--gold-border);border-radius:30px;cursor:pointer;font-family:var(--sans);background:var(--gold);color:white;">
                     Retry
                 </button>
             </div>`;
@@ -226,11 +225,14 @@ function setupSearch() {
 
 /* ─── NAVIGATION ─── */
 function setupNavigation() {
-    // Tab buttons
     document.querySelectorAll('.quick-tab').forEach(btn => {
         btn.addEventListener('click', () => {
             const tab = btn.dataset.tab;
             currentTab = tab;
+
+            // ── SCROLL FIX: reset to top before rebuilding DOM ──
+            resetScroll();
+
             document.getElementById('searchInput').value = '';
             document.querySelectorAll('.quick-tab').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -239,102 +241,288 @@ function setupNavigation() {
                 renderGrid(DB);
             } else if (tab === 'departments') {
                 renderGroupedGrid('department');
+            } else if (tab === 'contributors') {
+                renderContributors();
             } else {
                 openDirectory(tab);
             }
         });
     });
 
-    // Deck close
     document.getElementById('deckClose').addEventListener('click', closeDeck);
-
-    // Arrow buttons
     document.getElementById('arrowPrev').addEventListener('click', () => moveDeck(-1));
     document.getElementById('arrowNext').addEventListener('click', () => moveDeck(1));
-
-    // Directory panel close
     document.getElementById('dirClose').addEventListener('click', closeDirectory);
     document.getElementById('dirBackdrop').addEventListener('click', closeDirectory);
-
-    // Click outside deck (on overlay bg) to close
     document.getElementById('deckOverlay').addEventListener('click', e => {
         if (e.target === e.currentTarget) closeDeck();
     });
 }
 
-/* ─── COMPACT MASTHEAD ─────────────────────────────────────── */
-function setupCompactMasthead() {
-    const compactSearchBtn   = document.getElementById('compactSearchBtn');
-    const compactSearchBar   = document.getElementById('compactSearchBar');
-    const compactSearchInput = document.getElementById('compactSearchInput');
-    const mainSearchInput    = document.getElementById('searchInput');
-    const filterBtn          = document.getElementById('compactFilterBtn');
-    const sheetBackdrop      = document.getElementById('filterSheetBackdrop');
-    const sheetTabs          = document.getElementById('filterSheetTabs');
+/* ─── CONTRIBUTOR INITIALS AVATAR ─── */
+function getInitials(name) {
+    return name.trim().split(/\s+/).map(w => w[0].toUpperCase()).slice(0, 2).join('');
+}
 
-    // ── Search icon ──
-    compactSearchBtn.addEventListener('click', () => {
-        const isOpen = compactSearchBar.classList.toggle('open');
-        if (isOpen) {
-            compactSearchInput.focus();
-        } else {
-            compactSearchInput.value = '';
-            mainSearchInput.value = '';
-            mainSearchInput.dispatchEvent(new Event('input'));
+// Stable warm accent per contributor (cycles through a curated set)
+const CONTRIB_ACCENTS = [
+    { bg: '#b8913a', fg: '#fff' },
+    { bg: '#6b0f1a', fg: '#fff' },
+    { bg: '#2d5a3d', fg: '#fff' },
+    { bg: '#1a3a5c', fg: '#fff' },
+    { bg: '#5c3d1a', fg: '#fff' },
+    { bg: '#4a2060', fg: '#fff' },
+    { bg: '#1c4a4a', fg: '#fff' },
+];
+
+function accentForName(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    return CONTRIB_ACCENTS[hash % CONTRIB_ACCENTS.length];
+}
+
+/* ─── RENDER CONTRIBUTORS ─── */
+function renderContributors() {
+    const container = document.getElementById('mainContent');
+    container.innerHTML = '';
+
+    // Build contributor index
+    const index = {};
+    DB.forEach(item => {
+        if (!index[item.contributor]) {
+            index[item.contributor] = {
+                name:       item.contributor,
+                department: item.department,
+                quotes:     [],
+                latest:     item.date,
+            };
+        }
+        index[item.contributor].quotes.push(item);
+        if (item.date > index[item.contributor].latest) {
+            index[item.contributor].latest = item.date;
         }
     });
 
-    // Mirror compact search into the main search input so existing filter logic runs
-    compactSearchInput.addEventListener('input', () => {
-        mainSearchInput.value = compactSearchInput.value;
-        mainSearchInput.dispatchEvent(new Event('input'));
-    });
+    const contributors = Object.values(index)
+        .sort((a, b) => b.quotes.length - a.quotes.length);
 
-    // ── Filter sheet ──
-    filterBtn.addEventListener('click', () => {
-        sheetBackdrop.classList.add('open');
-        document.body.style.overflow = 'hidden';
-    });
+    // ── HALL OF FAME (top 3) ──
+    const podium = document.createElement('div');
+    podium.className = 'hof-section';
+    podium.innerHTML = `
+        <div class="hof-masthead">
+            <div class="hof-rule"></div>
+            <div class="hof-title-wrap">
+                <div class="hof-eyebrow">English Department</div>
+                <div class="hof-title">Hall of Fame</div>
+                <div class="hof-sub">Our most prolific voices</div>
+            </div>
+            <div class="hof-rule"></div>
+        </div>
+    `;
 
-    sheetBackdrop.addEventListener('click', e => {
-        if (e.target === sheetBackdrop) closeFilterSheet();
-    });
+    const medals  = ['🥇', '🥈', '🥉'];
+    const podiumRow = document.createElement('div');
+    podiumRow.className = 'hof-podium';
 
-    function closeFilterSheet() {
-        sheetBackdrop.classList.remove('open');
-        document.body.style.overflow = '';
-    }
-
-    // Sheet tab → trigger the matching main nav tab so existing handler runs
-    sheetTabs.addEventListener('click', e => {
-        const btn = e.target.closest('.filter-sheet-tab');
-        if (!btn) return;
-
-        const tab = btn.dataset.tab;
-
-        // Update sheet active state
-        sheetTabs.querySelectorAll('.filter-sheet-tab').forEach(b =>
-            b.classList.toggle('active', b === btn)
-        );
-
-        // Fire the main tab's click so all existing routing logic triggers
-        const mainTab = document.querySelector(`.quick-tab[data-tab="${tab}"]`);
-        if (mainTab) mainTab.click();
-
-        closeFilterSheet();
-    });
-
-    // Keep sheet highlights in sync when main tabs are clicked directly
-    document.querySelectorAll('.quick-tab').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tab = btn.dataset.tab;
-            if (sheetTabs) {
-                sheetTabs.querySelectorAll('.filter-sheet-tab').forEach(b =>
-                    b.classList.toggle('active', b.dataset.tab === tab)
-                );
-            }
+    // Reorder for visual podium: 2nd · 1st · 3rd
+    const podiumOrder = [1, 0, 2];
+    podiumOrder.forEach((rank, pos) => {
+        const c = contributors[rank];
+        if (!c) return;
+        const accent  = accentForName(c.name);
+        const initials = getInitials(c.name);
+        const latestQuote = c.quotes[0];
+        const card = document.createElement('div');
+        card.className = `hof-card hof-rank-${rank + 1}`;
+        card.style.animationDelay = `${pos * 100}ms`;
+        card.innerHTML = `
+            <div class="hof-medal">${medals[rank]}</div>
+            <div class="hof-avatar" style="background:${accent.bg};color:${accent.fg}">${initials}</div>
+            <div class="hof-name">${c.name}</div>
+            <div class="hof-dept">${c.department}</div>
+            <div class="hof-count">
+                <span class="hof-count-num">${c.quotes.length}</span>
+                <span class="hof-count-label">${c.quotes.length === 1 ? 'quote' : 'quotes'}</span>
+            </div>
+            <div class="hof-preview">"${latestQuote.quote.length > 80 ? latestQuote.quote.slice(0, 77) + '…' : latestQuote.quote}"</div>
+            <button class="hof-view-btn" aria-label="View ${c.name}'s quotes">View all →</button>
+        `;
+        card.querySelector('.hof-view-btn').addEventListener('click', () => {
+            renderGrid(c.quotes);
+            resetScroll();
         });
+        card.addEventListener('click', e => {
+            if (e.target.classList.contains('hof-view-btn')) return;
+            renderGrid(c.quotes);
+            resetScroll();
+        });
+        podiumRow.appendChild(card);
     });
+
+    podium.appendChild(podiumRow);
+    container.appendChild(podium);
+
+    // ── ALL CONTRIBUTORS GRID ──
+    if (contributors.length > 3) {
+        const restHeader = document.createElement('div');
+        restHeader.className = 'results-header';
+        restHeader.style.marginTop = '48px';
+        restHeader.textContent = `All ${contributors.length} Contributors`;
+        container.appendChild(restHeader);
+
+        const grid = document.createElement('div');
+        grid.className = 'contrib-grid';
+
+        contributors.forEach((c, i) => {
+            const accent   = accentForName(c.name);
+            const initials = getInitials(c.name);
+            const latest   = c.quotes[0];
+            const card = document.createElement('div');
+            card.className = 'contrib-card';
+            card.style.animationDelay = `${Math.min(i * 30, 400)}ms`;
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('role', 'button');
+            card.setAttribute('aria-label', `${c.name} — ${c.quotes.length} quotes`);
+
+            card.innerHTML = `
+                <div class="contrib-card-top">
+                    <div class="contrib-avatar" style="background:${accent.bg};color:${accent.fg}">${initials}</div>
+                    <div class="contrib-info">
+                        <div class="contrib-name">${c.name}</div>
+                        <div class="contrib-dept">${c.department}</div>
+                    </div>
+                    <div class="contrib-badge">${c.quotes.length}</div>
+                </div>
+                <div class="contrib-preview">"${latest.quote.length > 100 ? latest.quote.slice(0, 97) + '…' : latest.quote}"</div>
+                <div class="contrib-footer">
+                    <span class="contrib-author-tag">— ${latest.author}</span>
+                    <span class="contrib-arrow">→</span>
+                </div>
+            `;
+            card.addEventListener('click', () => {
+                renderGrid(c.quotes);
+                resetScroll();
+            });
+            card.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') { renderGrid(c.quotes); resetScroll(); }
+            });
+            grid.appendChild(card);
+        });
+
+        container.appendChild(grid);
+    }
+}
+
+/* ─── RENDER GROUPED GRID (Departments) ─── */
+function renderGroupedGrid(groupBy) {
+    const container = document.getElementById('mainContent');
+    container.innerHTML = '';
+
+    const index = {};
+    DB.forEach(item => {
+        const key = item[groupBy] || 'Other';
+        if (!index[key]) index[key] = [];
+        index[key].push(item);
+    });
+
+    const sorted = Object.keys(index).sort((a, b) => index[b].length - index[a].length);
+
+    sorted.forEach(groupName => {
+        const groupQuotes = index[groupName];
+        const section = document.createElement('div');
+        section.className = 'dept-section';
+
+        const heading = document.createElement('div');
+        heading.className = 'dept-heading';
+        heading.innerHTML = `
+            <span class="dept-heading-name">${groupName}</span>
+            <span class="dept-heading-count">${groupQuotes.length} ${groupQuotes.length === 1 ? 'quote' : 'quotes'}</span>
+        `;
+        section.appendChild(heading);
+
+        const grid = document.createElement('div');
+        grid.className = 'col-grid';
+
+        groupQuotes.forEach((q, i) => {
+            const card = document.createElement('div');
+            card.className = 'q-card';
+            card.style.animationDelay = `${Math.min(i * 30, 300)}ms`;
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('role', 'button');
+            card.setAttribute('aria-label', `Quote by ${q.author}`);
+
+            const snippet = q.about && q.about.trim()
+                ? `<div class="q-card-reflection">"${q.about.length > 120 ? q.about.slice(0, 117) + '…' : q.about}"<span class="q-card-reflection-by"> — ${q.contributor}</span></div>`
+                : '';
+
+            card.innerHTML = `
+                <div class="q-card-num">No. ${q.id} · ${q.dateStr}</div>
+                <div class="q-card-text">"${q.quote}"</div>
+                ${snippet}
+                <div class="q-card-footer">
+                    <div>
+                        <div class="q-card-author">${q.author} <span class="q-card-contrib">via ${q.contributor}</span></div>
+                        <div class="q-card-dept">${q.department}</div>
+                    </div>
+                    <div class="q-card-arrow">→</div>
+                </div>
+            `;
+            card.addEventListener('click', () => openDeck(groupQuotes, i));
+            card.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') openDeck(groupQuotes, i);
+            });
+            grid.appendChild(card);
+        });
+
+        section.appendChild(grid);
+        container.appendChild(section);
+    });
+}
+
+/* ─── DIRECTORY ─── */
+function openDirectory(category) {
+    const list = document.getElementById('dirList');
+    list.innerHTML = '';
+
+    const titleMap = { authors: 'Authors', contributors: 'Contributors', departments: 'Departments' };
+    document.getElementById('dirTitle').innerText = titleMap[category] || 'Directory';
+
+    const index = {};
+    DB.forEach(item => {
+        const key = category === 'authors'
+            ? item.author
+            : category === 'contributors'
+                ? item.contributor
+                : item.department;
+        if (!index[key]) index[key] = [];
+        index[key].push(item);
+    });
+
+    Object.keys(index)
+        .sort((a, b) => index[b].length - index[a].length)
+        .forEach(name => {
+            const row = document.createElement('div');
+            row.className = 'dir-row';
+            row.innerHTML = `
+                <span class="dir-row-name">${name}</span>
+                <span class="dir-badge">${index[name].length}</span>
+            `;
+            row.addEventListener('click', () => {
+                renderGrid(index[name]);
+                closeDirectory();
+                resetScroll();
+            });
+            list.appendChild(row);
+        });
+
+    document.getElementById('dirPanel').classList.add('open');
+    document.getElementById('dirBackdrop').classList.add('open');
+}
+
+function closeDirectory() {
+    document.getElementById('dirPanel').classList.remove('open');
+    document.getElementById('dirBackdrop').classList.remove('open');
 }
 
 /* ─── OPEN DECK ─── */
@@ -348,7 +536,6 @@ function openDeck(quotes, startIdx) {
     quotes.forEach((q, i) => {
         const slide = document.createElement('div');
         slide.className = 'deck-slide';
-
         const hasReflection = q.about && q.about.trim().length > 0;
 
         slide.innerHTML = `
@@ -435,117 +622,6 @@ function updateDeckPosition(animate = true) {
     loadGiscus(deckIdx);
 }
 
-/* ─── RENDER GROUPED GRID (Departments) ─── */
-function renderGroupedGrid(groupBy) {
-    const container = document.getElementById('mainContent');
-    container.innerHTML = '';
-
-    const index = {};
-    DB.forEach(item => {
-        const key = item[groupBy] || 'Other';
-        if (!index[key]) index[key] = [];
-        index[key].push(item);
-    });
-
-    const sorted = Object.keys(index).sort((a, b) => index[b].length - index[a].length);
-
-    sorted.forEach(groupName => {
-        const groupQuotes = index[groupName];
-
-        const section = document.createElement('div');
-        section.className = 'dept-section';
-
-        const heading = document.createElement('div');
-        heading.className = 'dept-heading';
-        heading.innerHTML = `
-            <span class="dept-heading-name">${groupName}</span>
-            <span class="dept-heading-count">${groupQuotes.length} ${groupQuotes.length === 1 ? 'quote' : 'quotes'}</span>
-        `;
-        section.appendChild(heading);
-
-        const grid = document.createElement('div');
-        grid.className = 'col-grid';
-
-        groupQuotes.forEach((q, i) => {
-            const card = document.createElement('div');
-            card.className = 'q-card';
-            card.style.animationDelay = `${Math.min(i * 30, 300)}ms`;
-            card.setAttribute('tabindex', '0');
-            card.setAttribute('role', 'button');
-            card.setAttribute('aria-label', `Quote by ${q.author}`);
-
-            const snippet = q.about && q.about.trim()
-                ? `<div class="q-card-reflection">"${q.about.length > 120 ? q.about.slice(0, 117) + '…' : q.about}"<span class="q-card-reflection-by"> — ${q.contributor}</span></div>`
-                : '';
-
-            card.innerHTML = `
-                <div class="q-card-num">No. ${q.id} · ${q.dateStr}</div>
-                <div class="q-card-text">"${q.quote}"</div>
-                ${snippet}
-                <div class="q-card-footer">
-                    <div>
-                        <div class="q-card-author">${q.author} <span class="q-card-contrib">via ${q.contributor}</span></div>
-                        <div class="q-card-dept">${q.department}</div>
-                    </div>
-                    <div class="q-card-arrow">→</div>
-                </div>
-            `;
-            card.addEventListener('click', () => openDeck(groupQuotes, i));
-            card.addEventListener('keydown', e => {
-                if (e.key === 'Enter' || e.key === ' ') openDeck(groupQuotes, i);
-            });
-            grid.appendChild(card);
-        });
-
-        section.appendChild(grid);
-        container.appendChild(section);
-    });
-}
-
-/* ─── DIRECTORY ─── */
-function openDirectory(category) {
-    const list = document.getElementById('dirList');
-    list.innerHTML = '';
-
-    const titleMap = { authors: 'Authors', contributors: 'Contributors', departments: 'Departments' };
-    document.getElementById('dirTitle').innerText = titleMap[category] || 'Directory';
-
-    const index = {};
-    DB.forEach(item => {
-        const key = category === 'authors'
-            ? item.author
-            : category === 'contributors'
-                ? item.contributor
-                : item.department;
-        if (!index[key]) index[key] = [];
-        index[key].push(item);
-    });
-
-    Object.keys(index)
-        .sort((a, b) => index[b].length - index[a].length)
-        .forEach(name => {
-            const row = document.createElement('div');
-            row.className = 'dir-row';
-            row.innerHTML = `
-                <span class="dir-row-name">${name}</span>
-                <span class="dir-badge">${index[name].length}</span>
-            `;
-            row.addEventListener('click', () => {
-                renderGrid(index[name]);
-                closeDirectory();
-            });
-            list.appendChild(row);
-        });
-
-    document.getElementById('dirPanel').classList.add('open');
-    document.getElementById('dirBackdrop').classList.add('open');
-}
-
-function closeDirectory() {
-    document.getElementById('dirPanel').classList.remove('open');
-    document.getElementById('dirBackdrop').classList.remove('open');
-}
-
 /* ─── GISCUS ─── */
 function loadGiscus(idx) {
     const slot = document.getElementById(`giscus-slot-${idx}`);
@@ -593,6 +669,70 @@ function setupSwipeEngine() {
 function jumpToQuote(id) {
     const found = DB.find(q => String(q.id) === String(id));
     if (found) openDeck(DB, DB.indexOf(found));
+}
+
+/* ─── COMPACT MASTHEAD ─── */
+function setupCompactMasthead() {
+    const compactSearchBtn   = document.getElementById('compactSearchBtn');
+    const compactSearchBar   = document.getElementById('compactSearchBar');
+    const compactSearchInput = document.getElementById('compactSearchInput');
+    const mainSearchInput    = document.getElementById('searchInput');
+    const filterBtn          = document.getElementById('compactFilterBtn');
+    const sheetBackdrop      = document.getElementById('filterSheetBackdrop');
+    const sheetTabs          = document.getElementById('filterSheetTabs');
+
+    compactSearchBtn.addEventListener('click', () => {
+        const isOpen = compactSearchBar.classList.toggle('open');
+        if (isOpen) {
+            compactSearchInput.focus();
+        } else {
+            compactSearchInput.value = '';
+            mainSearchInput.value = '';
+            mainSearchInput.dispatchEvent(new Event('input'));
+        }
+    });
+
+    compactSearchInput.addEventListener('input', () => {
+        mainSearchInput.value = compactSearchInput.value;
+        mainSearchInput.dispatchEvent(new Event('input'));
+    });
+
+    filterBtn.addEventListener('click', () => {
+        sheetBackdrop.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    });
+
+    sheetBackdrop.addEventListener('click', e => {
+        if (e.target === sheetBackdrop) closeFilterSheet();
+    });
+
+    function closeFilterSheet() {
+        sheetBackdrop.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    sheetTabs.addEventListener('click', e => {
+        const btn = e.target.closest('.filter-sheet-tab');
+        if (!btn) return;
+        const tab = btn.dataset.tab;
+        sheetTabs.querySelectorAll('.filter-sheet-tab').forEach(b =>
+            b.classList.toggle('active', b === btn)
+        );
+        const mainTab = document.querySelector(`.quick-tab[data-tab="${tab}"]`);
+        if (mainTab) mainTab.click();
+        closeFilterSheet();
+    });
+
+    document.querySelectorAll('.quick-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            if (sheetTabs) {
+                sheetTabs.querySelectorAll('.filter-sheet-tab').forEach(b =>
+                    b.classList.toggle('active', b.dataset.tab === tab)
+                );
+            }
+        });
+    });
 }
 
 /* ─── SHARE / EXPORT ─── */
