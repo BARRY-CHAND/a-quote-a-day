@@ -157,6 +157,7 @@ function renderGrid(quotes) {
     }
 
     container.innerHTML = '';
+    renderMobileGuide(container);
 
     const header = document.createElement('div');
     header.className = 'results-header';
@@ -185,7 +186,7 @@ function renderGrid(quotes) {
                     <div class="q-card-author">${q.author} <span class="q-card-contrib">via ${q.contributor}</span></div>
                     <div class="q-card-dept">${q.department}</div>
                 </div>
-                <div class="q-card-arrow">→</div>
+                <div class="q-card-arrow" aria-hidden="true">Read</div>
             </div>
         `;
         card.addEventListener('click', () => openDeck(quotes, i));
@@ -196,6 +197,23 @@ function renderGrid(quotes) {
     });
 
     container.appendChild(grid);
+}
+
+function renderMobileGuide(container) {
+    const guide = document.createElement('section');
+    guide.className = 'mobile-reading-guide';
+    guide.setAttribute('aria-label', 'How to use this archive');
+    guide.innerHTML = `
+        <div class="mobile-guide-kicker">Start here</div>
+        <h2 class="mobile-guide-title">Read one. Then swipe for the next.</h2>
+        <p class="mobile-guide-copy">Tap any card to open the reflection, swipe left or right between quotes, and leave a comment in the discussion.</p>
+        <div class="mobile-guide-steps">
+            <span>1 Tap a card</span>
+            <span>2 Swipe</span>
+            <span>3 Comment</span>
+        </div>
+    `;
+    container.appendChild(guide);
 }
 
 /* ─── SEARCH ─── */
@@ -285,6 +303,7 @@ function accentForName(name) {
 function renderContributors() {
     const container = document.getElementById('mainContent');
     container.innerHTML = '';
+    renderMobileGuide(container);
 
     // Build contributor index
     const index = {};
@@ -314,8 +333,8 @@ function renderContributors() {
             <div class="hof-rule"></div>
             <div class="hof-title-wrap">
                 <div class="hof-eyebrow">English Department</div>
-                <div class="hof-title">Hall of Fame</div>
-                <div class="hof-sub">Our most prolific voices</div>
+                <div class="hof-title">Voices in the Archive</div>
+                <div class="hof-sub">The people behind the reflections</div>
             </div>
             <div class="hof-rule"></div>
         </div>
@@ -345,8 +364,8 @@ function renderContributors() {
                 <span class="hof-count-num">${c.quotes.length}</span>
                 <span class="hof-count-label">${c.quotes.length === 1 ? 'quote' : 'quotes'}</span>
             </div>
-            <div class="hof-preview">"${latestQuote.quote.length > 80 ? latestQuote.quote.slice(0, 77) + '…' : latestQuote.quote}"</div>
-            <button class="hof-view-btn" aria-label="View ${c.name}'s quotes">View all →</button>
+            <div class="hof-preview">"${latestQuote.about ? (latestQuote.about.length > 80 ? latestQuote.about.slice(0, 77) + '…' : latestQuote.about) : latestQuote.quote.length > 80 ? latestQuote.quote.slice(0, 77) + '…' : latestQuote.quote}"</div>
+            <button class="hof-view-btn" aria-label="Read ${c.name}'s reflections">Read reflections →</button>
         `;
         card.querySelector('.hof-view-btn').addEventListener('click', () => {
             renderGrid(c.quotes);
@@ -394,7 +413,7 @@ function renderContributors() {
                     </div>
                     <div class="contrib-badge">${c.quotes.length}</div>
                 </div>
-                <div class="contrib-preview">"${latest.quote.length > 100 ? latest.quote.slice(0, 97) + '…' : latest.quote}"</div>
+                <div class="contrib-preview">"${latest.about ? (latest.about.length > 100 ? latest.about.slice(0, 97) + '…' : latest.about) : latest.quote.length > 100 ? latest.quote.slice(0, 97) + '…' : latest.quote}"</div>
                 <div class="contrib-footer">
                     <span class="contrib-author-tag">— ${latest.author}</span>
                     <span class="contrib-arrow">→</span>
@@ -418,6 +437,7 @@ function renderContributors() {
 function renderGroupedGrid(groupBy) {
     const container = document.getElementById('mainContent');
     container.innerHTML = '';
+    renderMobileGuide(container);
 
     const index = {};
     DB.forEach(item => {
@@ -465,7 +485,7 @@ function renderGroupedGrid(groupBy) {
                         <div class="q-card-author">${q.author} <span class="q-card-contrib">via ${q.contributor}</span></div>
                         <div class="q-card-dept">${q.department}</div>
                     </div>
-                    <div class="q-card-arrow">→</div>
+                    <div class="q-card-arrow" aria-hidden="true">Read</div>
                 </div>
             `;
             card.addEventListener('click', () => openDeck(groupQuotes, i));
@@ -574,6 +594,7 @@ function openDeck(quotes, startIdx) {
                 </div>
                 <div class="deck-right">
                     <div class="deck-comments-label">Discussion</div>
+                    <div class="deck-comment-prompt">What did this quote make you think about? Add a short response for the contributor.</div>
                     <div class="giscus-mount" id="giscus-slot-${i}"></div>
                 </div>
             </div>
