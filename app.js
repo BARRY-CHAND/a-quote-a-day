@@ -1,11 +1,3 @@
-/* ═══════════════════════════════════════════
-   A QUOTE A DAY — app.js
-   - Scroll-to-top fix on tab switch
-   - Contributor Hall of Fame + profile cards
-   - Compact mobile masthead
-   - Download all quotes for a date (HTML & PDF)
-═══════════════════════════════════════════ */
-
 const CONFIG = {
     REPO: "AndrewVeda/a-quote-a-day",
     DIR:  "quotes",
