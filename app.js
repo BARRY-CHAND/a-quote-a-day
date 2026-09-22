@@ -726,34 +726,46 @@ function setupCompactMasthead() {
         });
     });
 
-    /* ── Download-by-date (hamburger menu) ── */
-    const sheetDateInput  = document.getElementById('sheetDateInput');
-    const sheetHtmlBtn    = document.getElementById('sheetDownloadHtmlBtn');
-    const sheetPdfBtn     = document.getElementById('sheetDownloadPdfBtn');
+    /* ── Download-by-date-range (hamburger menu) ── */
+    const sheetFromDateInput = document.getElementById('sheetFromDateInput');
+    const sheetToDateInput   = document.getElementById('sheetToDateInput');
+    const sheetHtmlBtn       = document.getElementById('sheetDownloadHtmlBtn');
+    const sheetPdfBtn        = document.getElementById('sheetDownloadPdfBtn');
 
-    if (sheetDateInput && DB.length) {
-        // Default to the most recent quote's date
-        sheetDateInput.value = DB[0].dateStr;
+    if (sheetFromDateInput && sheetToDateInput && DB.length) {
+        // DB is sorted newest-first, so the last entry is the oldest date
+        sheetFromDateInput.value = DB[DB.length - 1].dateStr;
+        sheetToDateInput.value   = DB[0].dateStr;
+    }
+
+    // Reads and validates the from/to inputs. Silently swaps them if the
+    // person picked an end date earlier than the start date.
+    function getSheetDateRange() {
+        if (!sheetFromDateInput || !sheetToDateInput ||
+            !sheetFromDateInput.value || !sheetToDateInput.value) {
+            alert('Please choose both a "from" and "to" date.');
+            return null;
+        }
+        let from = sheetFromDateInput.value;
+        let to   = sheetToDateInput.value;
+        if (from > to) [from, to] = [to, from];
+        return { from, to };
     }
 
     if (sheetHtmlBtn) {
         sheetHtmlBtn.addEventListener('click', () => {
-            if (!sheetDateInput || !sheetDateInput.value) {
-                alert('Please choose a date first.');
-                return;
-            }
-            downloadDateAsHTML(sheetDateInput.value);
+            const range = getSheetDateRange();
+            if (!range) return;
+            downloadRangeAsHTML(range.from, range.to);
             closeFilterSheet();
         });
     }
 
     if (sheetPdfBtn) {
         sheetPdfBtn.addEventListener('click', () => {
-            if (!sheetDateInput || !sheetDateInput.value) {
-                alert('Please choose a date first.');
-                return;
-            }
-            downloadDateAsPDF(sheetDateInput.value);
+            const range = getSheetDateRange();
+            if (!range) return;
+            downloadRangeAsPDF(range.from, range.to);
             closeFilterSheet();
         });
     }
@@ -833,44 +845,80 @@ async function shareToWhatsApp(idx) {
 }
 
 // ==========================================
-// EXPORT FULL DATE TO HTML & PDF
+// EXPORT DATE RANGE TO HTML & PDF
 // ==========================================
 
-// Build the raw HTML string using data from DB directly
-function generateDateTemplate(dateString) {
-    const dateQuotes = DB.filter(q => q.dateStr === dateString);
-    if (dateQuotes.length === 0) return null;
+// Human-readable label for a YYYY-MM-DD string, e.g. "22 Sep 2026"
+function formatDateLabel(dateStr) {
+    if (!dateStr || dateStr === 'Unknown') return dateStr || 'Unknown';
+    const d = new Date(`${dateStr}T00:00:00`);
+    if (isNaN(d)) return dateStr;
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+}
 
-    let quotesHtml = '';
-    dateQuotes.forEach(q => {
-        const reflection = q.about ? `
-            <div style="background:#1c1a16; color:#f5f0e8; padding:1.5rem; margin-top:1.5rem; border-left: 3px solid #b8913a;">
-                <div style="font-family:'DM Mono',monospace; font-size:10px; color:#b8913a; text-transform:uppercase; letter-spacing:2px; margin-bottom:0.5rem;">What this means to me</div>
-                <div style="font-style:italic;">"${q.about}"</div>
-            </div>
-        ` : '';
+// All quotes whose dateStr falls within [fromStr, toStr] inclusive,
+// oldest first (ISO date strings compare correctly as plain strings).
+function getQuotesInRange(fromStr, toStr) {
+    return DB
+        .filter(q => q.dateStr !== 'Unknown' && q.dateStr >= fromStr && q.dateStr <= toStr)
+        .sort((a, b) => a.dateStr.localeCompare(b.dateStr) || String(a.id).localeCompare(String(b.id)));
+}
 
-        quotesHtml += `
-            <div style="margin-bottom:3rem; page-break-inside:avoid;">
-                <div style="font-family:'DM Mono',monospace; font-size:12px; color:#b8913a; text-transform:uppercase; letter-spacing:2px; margin-bottom:1rem;">Quote #${q.id}</div>
-                <div style="font-size:24px; font-weight:600; font-style:italic; line-height:1.4; color:#1c1a16; margin-bottom:1.5rem;">"${q.quote}"</div>
-                <div>
-                    <strong style="font-size:18px;">${q.author}</strong><br>
-                    <span style="font-family:'DM Mono',monospace; font-size:11px; text-transform:uppercase; color:#6b3f10; letter-spacing:1px;">Contributed by ${q.contributor} &bull; ${q.department}</span>
-                </div>
-                ${reflection}
+// Reusable single-quote block markup, used inside the combined HTML export
+function quoteBlockHTML(q) {
+    const reflection = q.about ? `
+        <div style="background:#1c1a16; color:#f5f0e8; padding:1.5rem; margin-top:1.5rem; border-left: 3px solid #b8913a;">
+            <div style="font-family:'DM Mono',monospace; font-size:10px; color:#b8913a; text-transform:uppercase; letter-spacing:2px; margin-bottom:0.5rem;">What this means to me</div>
+            <div style="font-style:italic;">"${q.about}"</div>
+        </div>
+    ` : '';
+
+    return `
+        <div style="margin-bottom:3rem; page-break-inside:avoid;">
+            <div style="font-family:'DM Mono',monospace; font-size:12px; color:#b8913a; text-transform:uppercase; letter-spacing:2px; margin-bottom:1rem;">Quote #${q.id}</div>
+            <div style="font-size:24px; font-weight:600; font-style:italic; line-height:1.4; color:#1c1a16; margin-bottom:1.5rem;">"${q.quote}"</div>
+            <div>
+                <strong style="font-size:18px;">${q.author}</strong><br>
+                <span style="font-family:'DM Mono',monospace; font-size:11px; text-transform:uppercase; color:#6b3f10; letter-spacing:1px;">Contributed by ${q.contributor} &bull; ${q.department}</span>
             </div>
-            <hr style="border:0; border-top:1px dashed #d3cec4; margin:3rem 0;">
-        `;
+            ${reflection}
+        </div>
+        <hr style="border:0; border-top:1px dashed #d3cec4; margin:3rem 0;">
+    `;
+}
+
+// Build the raw combined HTML string for a date range, quotes grouped under
+// a heading for each day they were posted on.
+function generateRangeTemplate(fromStr, toStr) {
+    const quotes = getQuotesInRange(fromStr, toStr);
+    if (quotes.length === 0) return null;
+
+    const byDate = {};
+    quotes.forEach(q => {
+        (byDate[q.dateStr] = byDate[q.dateStr] || []).push(q);
+    });
+
+    let sectionsHtml = '';
+    Object.keys(byDate).sort().forEach(dateStr => {
+        sectionsHtml += `
+            <div style="font-family:'DM Mono',monospace; font-size:11px; color:#b8913a; text-transform:uppercase; letter-spacing:3px; border-bottom:1px solid #d3cec4; padding-bottom:0.5rem; margin:2.5rem 0 2rem;">
+                ${formatDateLabel(dateStr)}
+            </div>`;
+        byDate[dateStr].forEach(q => { sectionsHtml += quoteBlockHTML(q); });
     });
 
     return `
         <div style="background:#fff; padding:4rem; max-width:800px; margin:0 auto; font-family:'Cormorant Garamond',Georgia,serif; color:#1c1a16; box-shadow:0 10px 30px rgba(0,0,0,0.05);">
-            <div style="text-align:center; border-bottom:2px solid #b8913a; padding-bottom:1rem; margin-bottom:3rem;">
+            <div style="text-align:center; border-bottom:2px solid #b8913a; padding-bottom:1rem; margin-bottom:1rem;">
                 <h1 style="margin:0; font-style:italic; font-size:36px;">A Quote A Day</h1>
-                <div style="font-family:'DM Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:3px; color:#6b3f10; margin-top:0.5rem;">Edition: ${dateString}</div>
+                <div style="font-family:'DM Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:3px; color:#6b3f10; margin-top:0.5rem;">
+                    ${formatDateLabel(fromStr)} &mdash; ${formatDateLabel(toStr)}
+                </div>
+                <div style="font-family:'DM Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:2px; color:#888; margin-top:0.35rem;">
+                    ${quotes.length} ${quotes.length === 1 ? 'Quote' : 'Quotes'}
+                </div>
             </div>
-            ${quotesHtml}
+            ${sectionsHtml}
             <div style="text-align:center; font-family:'DM Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:2px; color:#888;">
                 andrewveda.github.io/a-quote-a-day
             </div>
@@ -878,16 +926,16 @@ function generateDateTemplate(dateString) {
     `;
 }
 
-function downloadDateAsHTML(dateString) {
-    const bodyHtml = generateDateTemplate(dateString);
-    if (!bodyHtml) return alert('No quotes found for this date.');
+function downloadRangeAsHTML(fromStr, toStr) {
+    const bodyHtml = generateRangeTemplate(fromStr, toStr);
+    if (!bodyHtml) return alert('No quotes found in that date range.');
 
     const htmlContent = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Quotes - ${dateString}</title>
+        <title>Quotes - ${fromStr} to ${toStr}</title>
         <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
         <style>
             body { background-color:#f5f0e8; padding:3rem 1rem; margin:0; }
@@ -902,70 +950,132 @@ function downloadDateAsHTML(dateString) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Quotes_${dateString}.html`;
+    a.download = `Quotes_${fromStr}_to_${toStr}.html`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
 
-async function downloadDateAsPDF(dateString) {
-    const bodyHtml = generateDateTemplate(dateString);
-    if (!bodyHtml) return alert('No quotes found for this date.');
+// Standalone "page" element for a single quote, sized to be screenshotted
+// and dropped onto its own PDF page.
+function buildQuotePageEl(q) {
+    const reflection = q.about ? `
+        <div style="border-top:2px solid #b8913a; padding-top:1.25rem; margin-top:1.75rem;">
+            <div style="font-family:'DM Mono',monospace; font-size:10px; color:#b8913a; text-transform:uppercase; letter-spacing:2px; margin-bottom:0.6rem;">What this means to me</div>
+            <div style="font-style:italic; font-size:17px; line-height:1.6; color:#4a4640;">"${q.about}"</div>
+        </div>
+    ` : '';
 
-    // 1. Create off-screen container matching the HTML structure exactly
-    const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    container.style.top = '0';
-    container.style.width = '800px'; 
-    container.innerHTML = bodyHtml;
-    
-    document.body.appendChild(container);
+    const div = document.createElement('div');
+    div.style.cssText = "width:800px;min-height:1131px;box-sizing:border-box;background:#fff;display:flex;flex-direction:column;justify-content:center;padding:5rem 4.5rem;font-family:'Cormorant Garamond',Georgia,serif;color:#1c1a16;";
+    div.innerHTML = `
+        <div style="font-family:'DM Mono',monospace; font-size:11px; color:#b8913a; text-transform:uppercase; letter-spacing:2px; margin-bottom:1.75rem;">
+            Quote #${q.id} &middot; ${formatDateLabel(q.dateStr)}
+        </div>
+        <div style="font-size:32px; font-weight:600; font-style:italic; line-height:1.42; color:#1c1a16; margin-bottom:2.25rem;">"${q.quote}"</div>
+        <div style="border-top:2px solid #b8913a; padding-top:1.25rem;">
+            <div style="font-size:22px; font-weight:700;">${q.author}</div>
+            <div style="font-family:'DM Mono',monospace; font-size:11px; text-transform:uppercase; color:#6b3f10; letter-spacing:1px; margin-top:0.35rem;">
+                Contributed by ${q.contributor} &bull; ${q.department}
+            </div>
+        </div>
+        ${reflection}
+    `;
+    return div;
+}
+
+// Cover page for the range PDF
+function buildCoverPageEl(fromStr, toStr, quotes) {
+    const div = document.createElement('div');
+    div.style.cssText = "width:800px;min-height:1131px;box-sizing:border-box;background:#f5f0e8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4rem;font-family:'Cormorant Garamond',Georgia,serif;";
+    div.innerHTML = `
+        <div style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:5px; text-transform:uppercase; color:#b8913a; margin-bottom:1.5rem;">
+            English Department Wisdom Archive
+        </div>
+        <h1 style="font-style:italic; font-size:56px; margin:0 0 1.25rem; color:#1c1a16;">A Quote A Day</h1>
+        <div style="width:80px; height:2px; background:#b8913a; margin:0 0 1.5rem;"></div>
+        <div style="font-family:'DM Mono',monospace; font-size:13px; letter-spacing:3px; text-transform:uppercase; color:#6b3f10;">
+            ${formatDateLabel(fromStr)} &mdash; ${formatDateLabel(toStr)}
+        </div>
+        <div style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#888; margin-top:0.75rem;">
+            ${quotes.length} ${quotes.length === 1 ? 'Quote' : 'Quotes'}
+        </div>
+    `;
+    return div;
+}
+
+async function downloadRangeAsPDF(fromStr, toStr) {
+    const quotes = getQuotesInRange(fromStr, toStr);
+    if (quotes.length === 0) return alert('No quotes found in that date range.');
+
+    const stageHost = document.createElement('div');
+    stageHost.style.position = 'absolute';
+    stageHost.style.left = '-9999px';
+    stageHost.style.top = '0';
+    document.body.appendChild(stageHost);
 
     try {
-        // Wait a tiny bit for fonts inside the new DOM node to apply
-        await new Promise(r => setTimeout(r, 100));
-
-        const canvas = await html2canvas(container.firstElementChild, {
-            scale: 2, 
-            useCORS: true,
-            backgroundColor: '#f5f0e8'
-        });
-
-        const imgData = canvas.toDataURL('image/png');
         const { jsPDF } = window.jspdf;
-        
-        // A4 Paper proportions
-        const pdf = new jsPDF('p', 'pt', 'a4'); 
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`Quotes_${dateString}.pdf`);
-        
+        const pdf = new jsPDF('p', 'pt', 'a4');
+        const pdfWidth  = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+
+        // Cover page, then one page per quote
+        const pages = [buildCoverPageEl(fromStr, toStr, quotes), ...quotes.map(buildQuotePageEl)];
+
+        for (let i = 0; i < pages.length; i++) {
+            stageHost.innerHTML = '';
+            stageHost.appendChild(pages[i]);
+            // Let webfonts settle on the freshly-mounted node
+            await new Promise(r => setTimeout(r, 60));
+
+            const canvas = await html2canvas(pages[i], {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: i === 0 ? '#f5f0e8' : '#ffffff',
+            });
+            const imgData = canvas.toDataURL('image/png');
+
+            if (i > 0) pdf.addPage();
+
+            // Fit each quote's canvas onto exactly one page, centered
+            const imgW = pdfWidth;
+            const imgH = (canvas.height * imgW) / canvas.width;
+
+            if (imgH <= pdfHeight) {
+                pdf.addImage(imgData, 'PNG', 0, (pdfHeight - imgH) / 2, imgW, imgH);
+            } else {
+                const scaledH = pdfHeight;
+                const scaledW = (canvas.width * scaledH) / canvas.height;
+                pdf.addImage(imgData, 'PNG', (pdfWidth - scaledW) / 2, 0, scaledW, scaledH);
+            }
+        }
+
+        pdf.save(`Quotes_${fromStr}_to_${toStr}.pdf`);
+
     } catch (error) {
-        console.error("PDF Generation failed:", error);
-        alert("Failed to generate PDF.");
+        console.error('PDF Generation failed:', error);
+        alert('Failed to generate PDF.');
     } finally {
-        document.body.removeChild(container);
+        document.body.removeChild(stageHost);
     }
 }
 
 // ─── EVENT LISTENERS ─────────────────────────
+// The deck overlay's HTML/PDF buttons still export just the single day of
+// whichever quote is currently open, since they're tied to that one quote.
 
 document.getElementById('btnDownloadHtml').addEventListener('click', () => {
-    // Identify the date of the quote currently open in the deck
     const currentQuote = currentView[deckIdx];
     if (currentQuote) {
-        downloadDateAsHTML(currentQuote.dateStr);
+        downloadRangeAsHTML(currentQuote.dateStr, currentQuote.dateStr);
     }
 });
 
 document.getElementById('btnDownloadPdf').addEventListener('click', () => {
-    // Identify the date of the quote currently open in the deck
     const currentQuote = currentView[deckIdx];
     if (currentQuote) {
-        downloadDateAsPDF(currentQuote.dateStr);
+        downloadRangeAsPDF(currentQuote.dateStr, currentQuote.dateStr);
     }
 });
